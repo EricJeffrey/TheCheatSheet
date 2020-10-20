@@ -89,21 +89,24 @@ CodeSegment {
 
 前后端分离，后端提供静态文件及Rest接口，接口说明如下
 
-- `/index`, `GET`，首页文件
-- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`, `GET`，参数格式`language=xxx`，无参数时获取所有代码段数据，有参数时，根据参数值返回某种语言的所有代码段数据，如`/codeseg/all?language=Java`返回所有Java语言的代码段，返回值为JSON格式。响应体示例如下
+- `/index`，`GET`，首页文件
+
+- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`，`GET`，参数格式`language=xx`，无参数时获取所有代码段数据，有参数时，根据`language`参数值返回某种语言的代码段，根据`pageCount`和`pageSize`获取某一页的数据 如`/codeseg/all?language=Java*&pageCount=1&pageSize=10`返回Java语言的前十个代码段，返回值为JSON数组。响应体示例如下
 
   ```json
-  {
-    "id": "ea98f819-0dde-4e25-a6a2-17314cc27f1c",
-    "title": "Linux创建空文件",
-    "desc": "",
-    "code": "touch a.txt",
-    "language": "Command",
-    "createAt": "1603092591383",
-    "lastModify": "1603092601384"
-  }
+  [
+    {
+        "id": "ea98f819-0dde-4e25-a6a2-17314cc27f1c",
+        "title": "Linux创建空文件",
+        "desc": "",
+        "code": "touch a.txt",
+        "language": "Command",
+        "createAt": "1603092591383",
+        "lastModify": "1603092601384"
+    }
+  ]
   ```
-- `/codeseg/update`, `POST`, 请求体为更新后的JSON数据，响应体忽略，服务端处理请求时需更新数据`lastModify`字段的值。请求体示例同上
+- `/codeseg/update`，`POST`，请求体为更新后的JSON数据，响应体忽略，服务端处理请求时需更新数据`lastModify`字段的值。请求体示例:
 
   ```json
   {
