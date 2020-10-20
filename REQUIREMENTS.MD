@@ -90,7 +90,7 @@ CodeSegment {
 前后端分离，后端提供静态文件及Rest接口，接口说明如下
 
 - `/index`, `GET`，首页文件
-- `/codeseg/all?language=xx`, `GET`，参数格式`language=xxx`，无参数时获取所有代码段数据，有参数时，根据参数值返回某种语言的所有代码段数据，如`/codeseg/all?language=Java`返回所有Java语言的代码段，返回值为JSON格式。响应体示例如下
+- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`, `GET`，参数格式`language=xxx`，无参数时获取所有代码段数据，有参数时，根据参数值返回某种语言的所有代码段数据，如`/codeseg/all?language=Java`返回所有Java语言的代码段，返回值为JSON格式。响应体示例如下
 
   ```json
   {
@@ -115,4 +115,5 @@ CodeSegment {
     "createAt": "1603092591383",
     "lastModify": "由有服务器更新该值"
   }
+  ```
 
