@@ -4,6 +4,12 @@
     display: flex;
 }
 
+.small_space {
+    display: block;
+    width: 1em;
+    height: 1em;
+}
+
 .middle_space {
     display: block;
     width: 2em;
@@ -53,10 +59,16 @@
     border-right: 1px solid #33333322;
 }
 
+#main_menu {
+    flex: 1;
+    border: none;
+}
+
 #main_content {
     flex: 8;
     padding: 1em;
     height: 100%;
+    background-color: whitesmoke;
 }
 
 .ant-layout-sider-children {
@@ -66,15 +78,22 @@
 .ant-card {
     height: fit-content;
     transition: all ease 300ms;
-    border: #2088ff75 solid 1px;
-    color: steelblue;
+    box-shadow: #bebebe 1px 1px 5px;
+    margin: 0em 2em 1em 0em;
+}
+
+.ant-card pre {
+    background: #dddddd55;
+    padding: 0.2em;
+    width: fit-content;
+    color: rgb(0, 134, 90);
 }
 
 .ant-card:hover {
-    box-shadow: #2088ff75 1px 1px 25px;
+    box-shadow: #bebebe 1px 1px 32px;
 }
 
-#main_menu {
-    flex: 1;
-    border: none;
+.main_modal_content {
+    display: flex;
+    flex-direction: column;
 }
