@@ -91,7 +91,7 @@ CodeSegment {
 
 - `/index`，`GET`，首页文件
 
-- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`，`GET`，参数格式`language=xx`，无参数时获取所有代码段数据，有参数时，根据`language`参数值返回某种语言的代码段，根据`pageCount`和`pageSize`获取某一页的数据 如`/codeseg/all?language=Java*&pageCount=1&pageSize=10`返回Java语言的前十个代码段，返回值为JSON数组。响应体示例如下
+- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`，`GET`，参数格式`language=xx`，无参数时获取所有代码段数据，有参数时，根据`language`参数值返回某种语言的代码段，根据`pageCount`和`pageSize`获取某一页的数据 如`/codeseg/all?language=Java&pageCount=1&pageSize=10`返回Java语言的前十个代码段，返回值为JSON数组。响应体示例如下
 
   ```json
   [

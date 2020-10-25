@@ -93,7 +93,23 @@
     box-shadow: #bebebe 1px 1px 32px;
 }
 
+.main_modal {
+    max-width: 80%;
+    width: 80% !important;
+}
+
 .main_modal_content {
     display: flex;
     flex-direction: column;
+}
+
+.main_modal_code {
+    display: flex;
+    flex-direction: row;
+}
+.main_modal_highlighter, .main_modal_code_editor {
+    flex: 1;
+}
+.main_modal_code_editor {
+    margin-right: 1em;
 }
