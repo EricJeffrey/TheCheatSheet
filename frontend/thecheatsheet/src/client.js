@@ -13,7 +13,7 @@ function getCodeSeg(all, language, pageCnt, pageSz) {
         para += paraList[i];
         if (i != paraList.length - 1) para += "&";
     }
-    var url = "/codeseg/all" + (para.length > 0 ? "?" + para : "");
+    var url = "/codeSegment/all" + (para.length > 0 ? "?" + para : "");
     return new Promise((resolve, reject) => {
         resolve([
             {
