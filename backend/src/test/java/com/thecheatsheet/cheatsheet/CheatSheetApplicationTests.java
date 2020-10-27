@@ -1,4 +1,4 @@
-package com.thecheatsheet.CheatSheet;
+package com.thecheatsheet.cheatsheet;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;

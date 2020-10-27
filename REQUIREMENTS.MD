@@ -91,7 +91,7 @@ CodeSegment {
 
 - `/index`，`GET`，首页文件
 
-- `/codeseg/all?language=xx&pageCount=xx&pageSize=xx`，`GET`，参数格式`language=xx`，无参数时获取所有代码段数据，有参数时，根据`language`参数值返回某种语言的代码段，根据`pageCount`和`pageSize`获取某一页的数据 如`/codeseg/all?language=Java*&pageCount=1&pageSize=10`返回Java语言的前十个代码段，返回值为JSON数组。响应体示例如下
+- `/codeSegment/all?language=xx&pageCount=xx&pageSize=xx`，`GET`，参数格式`language=xx`，无参数时获取所有代码段数据，有参数时，根据`language`参数值返回某种语言的代码段，根据`pageCount`和`pageSize`获取某一页的数据 如`/codeSegment/all?language=Java*&pageCount=1&pageSize=10`返回Java语言的前十个代码段，返回值为JSON数组。响应体示例如下
 
   ```json
   [
@@ -106,7 +106,7 @@ CodeSegment {
     }
   ]
   ```
-- `/codeseg/update`，`POST`，更新某个代码段，请求体为更新后的JSON数据，响应体忽略，服务端处理请求时需更新数据`lastModify`字段的值。请求体示例:
+- `/codeSegment/update`，`POST`，更新某个代码段，请求体为更新后的JSON数据，响应体忽略，服务端处理请求时需更新数据`lastModify`字段的值。请求体示例:
 
   ```json
   {
@@ -119,7 +119,7 @@ CodeSegment {
     "lastModify": "由有服务器更新该值"
   }
   ```
-- `/codeseg/allLanguages`，`GET`，获取已有代码段的所有语言类型，返回值为JSON数组：
+- `/codeSegment/allLanguages`，`GET`，获取已有代码段的所有语言类型，返回值为JSON数组：
   ```json
   [
       "Java",
