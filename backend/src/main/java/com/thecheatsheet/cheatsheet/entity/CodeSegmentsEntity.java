@@ -18,6 +18,6 @@ public class CodeSegmentsEntity {
     String desc;
     String code;
     String language;
-    String createAt;
-    String lastModify;
+    Long createAt;
+    Long lastModify;
 }
