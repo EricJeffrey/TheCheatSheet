@@ -54,3 +54,6 @@ frontend/thecheatsheet/.env.production.local
 frontend/thecheatsheet/npm-debug.log*
 frontend/thecheatsheet/yarn-debug.log*
 frontend/thecheatsheet/yarn-error.log*
+
+# foobar
+foobar.*

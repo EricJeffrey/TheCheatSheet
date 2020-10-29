@@ -12,7 +12,7 @@
       - [分页获取代码段](#分页获取代码段)
       - [获取某个语言类型所有代码段](#获取某个语言类型所有代码段)
       - [分页获取某个语言类型代码段](#分页获取某个语言类型代码段)
-      - [获取语言类型数目](#获取语言类型数目)
+      - [获取已有语言类型](#获取已有语言类型)
   - [测试数据脚本](#测试数据脚本)
 
 
@@ -48,6 +48,9 @@ yellow open   codesegment RjmJNxHYTpyQU5KDNeaVNw   1   1          1            0
 yellow open   codeseg     2Uvp2jGaQH6r5dPjlkkc0A   1   1          0            0       208b           208b
 ```
 #### 创建索引
+
+注意：`Aggregation`要求目标字段类型为`keyword`，故更改`language`字段的类型为`keyword`，见[获取语言类型数目](#获取语言类型数目)
+
 ```sh
 curl -X PUT 'localhost:9200/codesegment' -H 'Content-Type: application/json' -d '
 {
@@ -72,7 +75,7 @@ curl -X PUT 'localhost:9200/codesegment' -H 'Content-Type: application/json' -d 
           "search_analyzer": "ik_smart"
       },
       "language":{
-          "type": "text"
+          "type": "keyword"
       },
       "createAt":{
           "type": "long"
@@ -407,15 +410,31 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
 #### 分页获取某个语言类型代码段
 
 同上，直接使用`from`+`size`字段配合，或使用`createAt`排序，然后使用`size`+`search_after`实现。
-#### 获取语言类型数目
-还没找到比较合适的方法，官方文档的:[Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-approximate-counts)可能有用，但是不知道为何自己测试的返回值很奇怪，`buckets`一直是0:
+#### 获取已有语言类型
+
+获取某个字段所有不同值可以使用`Aggregation`，但是目标字段需要是`keyword`类型。[Put mapping](https://www.elastic.co/guide/en/elasticsearch/reference/7.9/indices-put-mapping.html)可以添加字段或更新字段类型，但是不允许将`text`类型更新为`keyword`，所以需要重建`index`。
+
+之后参考官方文档的:[Terms Aggregation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-bucket-terms-aggregation.html#search-aggregations-bucket-terms-aggregation-approximate-counts)即可
+```sh
+curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
+{
+  "aggs": {
+    "languages": {
+      "terms": { "field": "language" } 
+    }
+  },
+  "size": 0
+}
+'
+```
+返回值如下
 ```json
 {
-  "took" : 0,
+  "took" : 5,
   "timed_out" : false,
   "_shards" : {
-    "total" : 1,
-    "successful" : 1,
+    "total" : 2,
+    "successful" : 2,
     "skipped" : 0,
     "failed" : 0
   },
@@ -431,11 +450,29 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
     "languages" : {
       "doc_count_error_upper_bound" : 0,
       "sum_other_doc_count" : 0,
-      "buckets" : [ ]
+      "buckets" : [
+        {
+          "key" : "Python",
+          "doc_count" : 44
+        },
+        {
+          "key" : "C++",
+          "doc_count" : 43
+        },
+        {
+          "key" : "Command",
+          "doc_count" : 39
+        },
+        {
+          "key" : "Java",
+          "doc_count" : 39
+        }
+      ]
     }
   }
 }
 ```
+
 直接在MySQL中记录现有的语言类型数目应也不是问题，尽管不是特别优雅。
 
 ## 测试数据脚本
