@@ -10,9 +10,9 @@
       - [获取某个代码段](#获取某个代码段)
       - [获取所有代码段](#获取所有代码段)
       - [分页获取代码段](#分页获取代码段)
-      - [获取某个语言类型所有代码段](#获取某个语言类型所有代码段)
-      - [分页获取某个语言类型代码段](#分页获取某个语言类型代码段)
-      - [获取已有语言类型](#获取已有语言类型)
+      - [获取某个标签类型所有代码段](#获取某个标签类型所有代码段)
+      - [分页获取某个标签类型代码段](#分页获取某个标签类型代码段)
+      - [获取已有标签类型](#获取已有标签类型)
   - [测试数据脚本](#测试数据脚本)
 
 
@@ -49,7 +49,7 @@ yellow open   codeseg     2Uvp2jGaQH6r5dPjlkkc0A   1   1          0            0
 ```
 #### 创建索引
 
-注意：`Aggregation`要求目标字段类型为`keyword`，故更改`language`字段的类型为`keyword`，见[获取语言类型数目](#获取语言类型数目)
+注意：`Aggregation`要求目标字段类型为`keyword`，故更改`tag`字段的类型为`keyword`，见[获取已有标签类型](#获取已有标签类型)
 
 ```sh
 curl -X PUT 'localhost:9200/codesegment' -H 'Content-Type: application/json' -d '
@@ -74,7 +74,7 @@ curl -X PUT 'localhost:9200/codesegment' -H 'Content-Type: application/json' -d 
           "analyzer": "ik_max_word",
           "search_analyzer": "ik_smart"
       },
-      "language":{
+      "tag":{
           "type": "keyword"
       },
       "createAt":{
@@ -92,7 +92,7 @@ curl -X PUT 'localhost:9200/codesegment' -H 'Content-Type: application/json' -d 
 {"acknowledged":true,"shards_acknowledged":true,"index":"codeseg"}
 ```
 #### 删除索引
- `curl -X DELETE 'localhost:9200/codesegment`，返回值`{"acknowledged":true}`
+ `curl -X DELETE 'localhost:9200/codesegment'`，返回值`{"acknowledged":true}`
 #### 添加
 
 ```sh
@@ -102,7 +102,7 @@ curl -X PUT 'localhost:9200/codesegment/_create/ea98f819-0dde-4e25-a6a2-17314cc2
   "title": "Linux创建空文件",
   "desc": "",
   "code": "touch a.txt",
-  "language": "Command",
+  "tag": "Command",
   "createAt": 1603092591383,
   "lastModify": 1603092601384
 }'
@@ -133,7 +133,7 @@ curl -X PUT 'localhost:9200/codesegment/_doc/ea98f819-0dde-4e25-a6a2-17314cc27f1
   "title": "Linux创建空文件",
   "desc": "创建不包含任何内容的空文件，echo > a.txt有相同功能",
   "code": "touch a.txt",
-  "language": "Command",
+  "tag": "Command",
   "createAt": 3603092591383,
   "lastModify": 3603092591383
 }'
@@ -218,7 +218,7 @@ curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' 
       "title":"Linux创建空文件",
       "desc":"创建不包含任何内容的空文件，echo > a.txt有相同功能",
       "code":"touch a.txt",
-      "language":"Command",
+      "tag":"Command",
       "createAt":3603092591383,
       "lastModify":3603092591383
   }
@@ -254,7 +254,7 @@ curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' 
                     "title":"Linux创建空文件",
                     "desc":"创建不包含任何内容的空文件，echo > a.txt有相同功能",
                     "code":"touch a.txt",
-                    "language":"Command",
+                    "tag":"Command",
                     "createAt":3603092591383,
                     "lastModify":3603092591383
                 }
@@ -326,16 +326,16 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
     ]
 }'
 ```
-#### 获取某个语言类型所有代码段
+#### 获取某个标签类型所有代码段
 
-可以直接匹配`language`
+可以直接匹配`tag`
 
 ```sh
 curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: application/json' -d'
 {
     "size": 3,
     "query": { 
-        "match": { "language": "C++" }
+        "match": { "tag": "C++" }
     }
 }'
 ```
@@ -368,7 +368,7 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
           "title" : "查看命令帮助，命令的词典，更复杂的还有info，但不常用\n",
           "desc" : "",
           "code" : "man",
-          "language" : "C++",
+          "tag" : "C++",
           "createAt" : 1603890263041,
           "lastModify" : 1603890263041
         }
@@ -383,7 +383,7 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
           "title" : "全拼change directory，功能是从当前工作目录切换到指定的工作目录\n",
           "desc" : "",
           "code" : "cd",
-          "language" : "C++",
+          "tag" : "C++",
           "createAt" : 1603890263191,
           "lastModify" : 1603890263191
         }
@@ -398,7 +398,7 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
           "title" : "全拼remove，其功能是删除一个或多个文件或目录\n",
           "desc" : "",
           "code" : "rm",
-          "language" : "C++",
+          "tag" : "C++",
           "createAt" : 1603890263554,
           "lastModify" : 1603890263554
         }
@@ -407,10 +407,10 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
   }
 }
 ```
-#### 分页获取某个语言类型代码段
+#### 分页获取某个标签类型代码段
 
 同上，直接使用`from`+`size`字段配合，或使用`createAt`排序，然后使用`size`+`search_after`实现。
-#### 获取已有语言类型
+#### 获取已有标签类型
 
 获取某个字段所有不同值可以使用`Aggregation`，但是目标字段需要是`keyword`类型。[Put mapping](https://www.elastic.co/guide/en/elasticsearch/reference/7.9/indices-put-mapping.html)可以添加字段或更新字段类型，但是不允许将`text`类型更新为`keyword`，所以需要重建`index`。
 
@@ -419,8 +419,8 @@ curl -X GET "localhost:9200/codesegment/_search?pretty" -H 'Content-Type: applic
 curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' -d'
 {
   "aggs": {
-    "languages": {
-      "terms": { "field": "language" } 
+    "tags": {
+      "terms": { "field": "tag" } 
     }
   },
   "size": 0
@@ -447,7 +447,7 @@ curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' 
     "hits" : [ ]
   },
   "aggregations" : {
-    "languages" : {
+    "tags" : {
       "doc_count_error_upper_bound" : 0,
       "sum_other_doc_count" : 0,
       "buckets" : [
@@ -473,7 +473,7 @@ curl -X GET "localhost:9200/_search?pretty" -H 'Content-Type: application/json' 
 }
 ```
 
-直接在MySQL中记录现有的语言类型数目应也不是问题，尽管不是特别优雅。
+直接在MySQL中记录现有的标签类型数目应也不是问题，尽管不是特别优雅。
 
 ## 测试数据脚本
 
@@ -486,7 +486,7 @@ import time
 
 with open("LinuxCommands.txt", mode="r", encoding="utf-8") as fp:
     totid = 111
-    langList = ["Java", "C++", "Command", "Python"]
+    tagList = ["Java", "C++", "Command", "Python"]
     for line in fp.readlines():
         time.sleep(0.001)
         if '：' in line:
@@ -499,7 +499,7 @@ with open("LinuxCommands.txt", mode="r", encoding="utf-8") as fp:
                 "title": title,
                 "desc": "",
                 "code": code,
-                "language": langList[random.randint(0, len(langList) - 1)],
+                "tag": tagList[random.randint(0, len(tagList) - 1)],
                 "createAt": now,
                 "lastModify": now
             }
