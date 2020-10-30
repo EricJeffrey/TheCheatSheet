@@ -497,7 +497,7 @@ with open("LinuxCommands.txt", mode="r", encoding="utf-8") as fp:
             data = {
                 "id": str(totid),
                 "title": title,
-                "desc": "",
+                "description": "",
                 "code": code,
                 "tag": tagList[random.randint(0, len(tagList) - 1)],
                 "createAt": now,
