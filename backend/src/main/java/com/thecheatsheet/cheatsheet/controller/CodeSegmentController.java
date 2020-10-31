@@ -12,7 +12,6 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Date;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 /**
@@ -28,6 +27,7 @@ public class CodeSegmentController {
     @PostMapping("/codeSegment/update")
     public void update(@RequestBody String payload) {
         CodeSegmentEntity codeSegment = JSONObject.parseObject(payload, CodeSegmentEntity.class);
+        codeSegment.setLastModify((new Date()).getTime());
         // update mysql
         codeSegmentMapper.UpdateCodeSegment(codeSegment.getId(), codeSegment.getTitle(), codeSegment.getDescription(),
                 codeSegment.getCode(), codeSegment.getTag(), codeSegment.getLastModify());

@@ -72,8 +72,14 @@
     background-color: whitesmoke;
 }
 
+.main_card{
+    max-width: 300px;
+}
+
 #main_card_holder {
     display: "flex";
+    flex-wrap: wrap;
+    align-items: stretch;
     width: 100%;
     background-color: inherit;
 }

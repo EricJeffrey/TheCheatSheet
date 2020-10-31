@@ -117,6 +117,15 @@ CodeSegment {
     "lastModify": "由有服务器更新该值"
   }
   ```
+- `/codeSegment/add`，`POST`，添加代码段，请求体如下，响应体忽略
+  ```json
+  {
+      "title": "title",
+      "description": "desc",
+      "code": "xxx",
+      "tag": "language/tag"
+  }
+  ```
 - `/codeSegment/allTags`，`GET`，获取已有代码段的所有标签类型，返回值为JSON数组：
   ```json
   [

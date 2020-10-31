@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Button, Card, Input, Layout, Menu, message, Select, Space } from 'antd';
 import SyntaxHighlighter from 'react-syntax-highlighter';
 import {
-    EyeOutlined, CopyOutlined, EditOutlined,
+    EyeOutlined, EditOutlined,
     CloseCircleOutlined, CheckCircleOutlined, DownOutlined
 } from '@ant-design/icons';
 import 'antd/dist/antd.css';
@@ -11,6 +11,7 @@ import Modal from 'antd/lib/modal/Modal';
 import TextArea from 'antd/lib/input/TextArea';
 import { docco } from 'react-syntax-highlighter/dist/esm/styles/hljs';
 import client from './client';
+import Text from 'antd/lib/typography/Text';
 
 const { Header, Sider, Content } = Layout;
 
@@ -32,7 +33,8 @@ export default class App extends Component {
                 visible: false,
                 editable: false,
                 adding: false,
-                data: null
+                data: null,
+                targetIndex: null
             },
             tagList: [],
             data: [],
@@ -45,7 +47,7 @@ export default class App extends Component {
         this.onAddClick = this.onAddClick.bind(this);
         this.updateType = this.updateType.bind(this);
         this.loadMore = this.loadMore.bind(this);
-        this.doCopy = this.doCopy.bind(this);
+        this.updateAfterModal = this.updateAfterModal.bind(this);
     }
 
     updateType(type, pageCount, searchText) {
@@ -73,7 +75,9 @@ export default class App extends Component {
         }
         tmpPromise.then((codeSegments) => {
             this.updateType(this.dataType, this.pageCount + 1);
-            this.setState({ data: codeSegments });
+            this.setState({
+                data: this.state.data.concat(codeSegments)
+            });
         }).catch(() => { message.error(ERROR_MESSAGE_DATA); });
     }
 
@@ -122,7 +126,7 @@ export default class App extends Component {
     onMenuClick({ item, key, keyPath, domEvent }) {
         var tmpPromise = (key === "0")
             ? client.getCodeSegments(0)
-            : client.getCodeSegmentsByTag(this.state.tagList[Number.parseInt(key)]);
+            : client.getCodeSegmentsByTag(this.state.tagList[Number.parseInt(key)], 0);
         tmpPromise.then((codeSegments) => {
             this.updateType((key === "0") ? DATA_TYPE_ALL : DATA_TYPE_BY_TAG, 0);
             this.setState({ menuSelectedKey: key, data: codeSegments });
@@ -137,13 +141,19 @@ export default class App extends Component {
                 visible: true,
                 adding: false,
                 editable: doEdit,
-                data: this.state.data[index]
+                data: this.state.data[index],
+                targetIndex: index
             }
         });
     }
 
-    doCopy(index) {
-        // todo copy here
+    updateAfterModal(index, newData) {
+        if (index !== null)
+            this.setState((prevState) => {
+                var newState = prevState;
+                newState.data[index] = newData;
+                return newState;
+            });
     }
 
     render() {
@@ -158,27 +168,23 @@ export default class App extends Component {
                 if (value.description === null || value.description.length === 0)
                     descDiv = <p>{value.title}</p>;
                 else {
-                    descDiv = <div>
-                        {value.description.split('\n').map((tmpv, index) => <p key={index}>
-                            {tmpv}
-                        </p>)}
+                    descDiv = <div>{
+                        value.description.split('\n').map(
+                            (tmpv, index) => <Text ellipsis={true} key={index}>{tmpv}</Text>
+                        )}
                     </div>;
                 }
                 return <Card className="main_card"
-                    title={
-                        <div style={{ marginRight: "1em" }}>
-                            {value.title}
-                        </div>}
+                    title={<Text ellipsis={true} style={{ fontWeight: "bold", width: "100%" }}>{value.title}</Text>}
                     key={index}
                     extra={
                         <Space>
                             <EyeOutlined onClick={() => { this.viewDetail(index, false); }} />
                             <EditOutlined onClick={() => { this.viewDetail(index, true); }} />
-                            <CopyOutlined onClick={() => { this.doCopy(index); }} />
                         </Space>
                     }>
                     {descDiv}
-                    <pre>{value.code.split('\n')[0] + "..."}</pre>
+                    <Text ellipsis={true} copyable={true}>{value.code}</Text>
                 </Card>
             })}
         </>;
@@ -212,10 +218,13 @@ export default class App extends Component {
                             {cardLists}
                         </div>
                         <Button
+                            onClick={(e) => { this.loadMore(); }}
                             icon={<DownOutlined />}
                             style={{ border: "none", background: "#ffffff33" }}>加载更多</Button>
                     </Content>
-                    <DetailModal status={this.state.dialogStatus} />
+                    <DetailModal
+                        updateAfterModal={this.updateAfterModal}
+                        status={this.state.dialogStatus} />
                 </Layout>
             </Layout>
         );
@@ -226,8 +235,7 @@ class DetailModal extends Component {
     constructor(props) {
         super(props);
 
-        this.tagList = ["Text", "C++", "Java", "Python", "Bash", "JavaScript", "Go",
-            "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
+        this.tagList = ["Text", "Linux", "C++", "Java", "Python", "Bash", "JavaScript", "Go", "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
         this.status = {
             visible: false,
             editable: false,
@@ -237,8 +245,11 @@ class DetailModal extends Component {
                 description: null,
                 code: null,
                 tag: null,
-            }
+            },
+            targetIndex: null,
+            lastSuccessJobData: null
         };
+        this.updateAfterModal = props.updateAfterModal;
 
         this.closeMe = this.closeMe.bind(this);
         this.onDoEdit = this.onDoEdit.bind(this);
@@ -267,29 +278,26 @@ class DetailModal extends Component {
         var tmpPromise;
         if (this.status.adding) {
             const data = this.status.data;
-            var tmps = 1;
             if (isEmpty(data.title) && isEmpty(data.description))
-                tmps = "标题或描述";
+                message.warn("标题或描述不可为空");
             else if (isEmpty(data.code))
-                tmps = "代码";
-            else;
-            if (tmps !== 1) {
-                message.warn(tmps + "不可为空");
-                return;
-            }
-            tmpPromise = client.addCodeSegment(data.title, data.description, data.tag, data.code);
+                message.warn("代码不可为空");
+            else
+                tmpPromise = client.addCodeSegment(data.title, data.description, data.tag, data.code);
         } else {
             tmpPromise = client.updateCodeSegment(this.status.data);
         }
         tmpPromise.then(() => {
             this.status.editable = false;
+            this.status.lastSuccessJobData = Object.assign({}, this.status.data);
             message.info((this.status.adding ? "添加" : "更新") + "成功");
             this.setState({});
         }).catch(() => {
             message.error((this.status.adding ? "添加" : "更新") + "失败");
+        }).then(() => {
+            if (closeAfterupdate != null && closeAfterupdate === true)
+                this.closeMe();
         });
-        if (closeAfterupdate != null && closeAfterupdate === true)
-            this.closeMe();
     }
 
     closeMe() {
@@ -314,6 +322,8 @@ class DetailModal extends Component {
 
     render() {
         this.status = this.props.status;
+        this.status.lastSuccessJobData = Object.assign({}, this.status.data);
+
         if (this.status.data === null)
             return <div></div>;
         const disabled = !this.status.editable;
@@ -328,6 +338,7 @@ class DetailModal extends Component {
 
 
         return <Modal
+            afterClose={() => { this.updateAfterModal(this.status.targetIndex, this.status.lastSuccessJobData); }}
             onOk={(e) => { this.update(e, true) }}
             onCancel={this.closeMe}
             className="main_modal"
