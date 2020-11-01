@@ -193,11 +193,11 @@ export default class App extends Component {
             {this.state.data.map((value, index) => {
                 var descDiv;
                 if (value.description === null || value.description.length === 0)
-                    descDiv = <p>{value.title}</p>;
+                    descDiv = <Text style={{ width: "100%" }} ellipsis={true} >{value.title}</Text>;
                 else {
                     descDiv = <div>{
                         value.description.split('\n').map(
-                            (tmpv, index) => <Text ellipsis={true} key={index}>{tmpv}</Text>
+                            (tmpv, index) => <Text style={{ width: "100%" }} ellipsis={true} key={index}>{tmpv}</Text>
                         )}
                     </div>;
                 }
