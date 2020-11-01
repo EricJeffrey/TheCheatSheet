@@ -9,6 +9,8 @@ services:
         # ports: 
         #     - 9200:9200
         #     - 9300:9300
+        volumes: 
+            - /data/cheatsheet/elasticsearch:/usr/share/elasticsearch/data
     mysql:
         build: 
             context: ./
@@ -17,8 +19,8 @@ services:
         container_name: cheatsheet-mysql
         # ports: 
         #     - 3306:3306
-        # volumes: 
-        #     - /path/to/project/data
+        volumes: 
+            - /data/cheatsheet/db_mysql:/var/lib/mysql
     cheatsheet:
         build: 
             context: ./
