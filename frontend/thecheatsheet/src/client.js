@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const BASE_URL = "http://192.168.31.106:8686/codeSegment/";
+const BASE_URL = "/codeSegment/";
 const DEFAULT_PAGE_SIZE = 20;
 
 // const MOCK_CODE_SEGMENTS = [

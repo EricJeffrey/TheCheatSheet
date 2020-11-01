@@ -21,6 +21,7 @@ const DATA_TYPE_SEARCH = 3;
 
 const ERROR_MESSAGE_DATA = "获取数据失败";
 
+// FIXME tagList can not update - elasticsearch not responding very quickly
 export default class App extends Component {
     constructor(props) {
         super(props);
@@ -84,10 +85,11 @@ export default class App extends Component {
     componentDidMount() {
         client.getAllTags()
             .then((tagList) => {
+                this.setState({ tagList: ["All", ...tagList] });
                 client.getCodeSegments(0)
                     .then((codeSegments) => {
                         this.updateType(DATA_TYPE_ALL, 0);
-                        this.setState({ data: codeSegments, tagList: ["All", ...tagList] });
+                        this.setState({ data: codeSegments });
                     })
                     .catch(() => { message.error(ERROR_MESSAGE_DATA) });
             })
@@ -147,13 +149,38 @@ export default class App extends Component {
         });
     }
 
-    updateAfterModal(index, newData) {
-        if (index !== null)
-            this.setState((prevState) => {
-                var newState = prevState;
-                newState.data[index] = newData;
-                return newState;
-            });
+    updateAfterModal(addCanceled, index, newData) {
+
+        if (this.state.dialogStatus.adding) {
+            if (addCanceled === true)
+                return;
+            window.location.reload();
+            // client.getAllTags()
+            //     .then((tagList) => {
+            //         this.setState({ tagList: ["All", ...tagList] });
+            //         if (this.dataType === DATA_TYPE_ALL) {
+            //             client.getCodeSegments(0)
+            //                 .then((codeSegments) => {
+            //                     this.updateType(DATA_TYPE_ALL, 0);
+            //                     this.setState({ data: codeSegments });
+            //                 })
+            //                 .catch(() => { message.error(ERROR_MESSAGE_DATA); })
+            //         }
+
+            //     })
+            //     .catch((r) => { message.error("获取标签列表失败"); });
+        }
+        // update
+        if (index !== null) {
+            client.getAllTags().then((tagList) => {
+                this.setState((prevState) => {
+                    var newState = prevState;
+                    newState.data[index] = newData;
+                    newState.tagList = ["All", ...tagList]
+                    return newState;
+                });
+            }).catch(() => { message.error("获取标签列表失败"); });
+        }
     }
 
     render() {
@@ -175,7 +202,7 @@ export default class App extends Component {
                     </div>;
                 }
                 return <Card className="main_card"
-                    title={<Text ellipsis={true} style={{ fontWeight: "bold", width: "100%" }}>{value.title}</Text>}
+                    title={<Text ellipsis={true} style={{ fontWeight: "bold", width: "100%", marginRight: 10 }}>{value.title}</Text>}
                     key={index}
                     extra={
                         <Space>
@@ -235,11 +262,13 @@ class DetailModal extends Component {
     constructor(props) {
         super(props);
 
-        this.tagList = ["Text", "Linux", "C++", "Java", "Python", "Bash", "JavaScript", "Go", "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
+        this.tagList = ["Text", "Linux", "C++", "Java", "Python", "Bash",
+            "JavaScript", "Go", "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
         this.status = {
             visible: false,
             editable: false,
             adding: false,
+            addResult: false,
             data: {
                 title: null,
                 description: null,
@@ -278,10 +307,14 @@ class DetailModal extends Component {
         var tmpPromise;
         if (this.status.adding) {
             const data = this.status.data;
-            if (isEmpty(data.title) && isEmpty(data.description))
+            if (isEmpty(data.title) && isEmpty(data.description)) {
                 message.warn("标题或描述不可为空");
-            else if (isEmpty(data.code))
+                return;
+            }
+            else if (isEmpty(data.code)) {
                 message.warn("代码不可为空");
+                return;
+            }
             else
                 tmpPromise = client.addCodeSegment(data.title, data.description, data.tag, data.code);
         } else {
@@ -290,7 +323,8 @@ class DetailModal extends Component {
         tmpPromise.then(() => {
             this.status.editable = false;
             this.status.lastSuccessJobData = Object.assign({}, this.status.data);
-            message.info((this.status.adding ? "添加" : "更新") + "成功");
+            this.status.addResult = true;
+            message.info((this.status.adding ? "添加" : "更新") + "成功")
             this.setState({});
         }).catch(() => {
             message.error((this.status.adding ? "添加" : "更新") + "失败");
@@ -324,21 +358,32 @@ class DetailModal extends Component {
         this.status = this.props.status;
         this.status.lastSuccessJobData = Object.assign({}, this.status.data);
 
+        if (this.status.adding && this.status.data.tag === "")
+            this.status.data.tag = this.tagList[0];
+
         if (this.status.data === null)
             return <div></div>;
         const disabled = !this.status.editable;
-        var rawTag = "";
-        rawTag = this.status.data?.tag;
-        if (rawTag.length === 0) rawTag = "Java";
 
-        var tag = rawTag;
-        tag = tag.toLowerCase();
-        if (tag === "c++") tag = "cpp";
-        if (tag === "c#") tag = "csharp";
+        // rawTag is for [Select]
+        var rawTag = "";
+        if (this.status.data !== null)
+            rawTag = this.status.data.tag;
+        if (rawTag === null || rawTag.length === 0) rawTag = this.tagList[0];
+
+        // tag is for SyntaxHightlight
+        var language = rawTag;
+        language = language.toLowerCase();
+        if (language === "c++") language = "cpp";
+        else if (language === "c#") language = "csharp";
 
 
         return <Modal
-            afterClose={() => { this.updateAfterModal(this.status.targetIndex, this.status.lastSuccessJobData); }}
+            afterClose={() => {
+                // when is cancel
+                this.updateAfterModal(
+                    !(this.status.addResult === true), this.status.targetIndex, this.status.lastSuccessJobData);
+            }}
             onOk={(e) => { this.update(e, true) }}
             onCancel={this.closeMe}
             className="main_modal"
@@ -352,7 +397,7 @@ class DetailModal extends Component {
                     justifyContent: "flex-end",
                     marginBottom: "1em"
                 }}>
-                    <CheckCircleOutlined hidden={disabled} onClick={this.update} />
+                    <CheckCircleOutlined hidden={disabled || this.status.adding} onClick={this.update} />
                     <EditOutlined onClick={this.onDoEdit} />
                     <CloseCircleOutlined onClick={this.closeMe} />
                 </Space>
@@ -365,9 +410,9 @@ class DetailModal extends Component {
                         value={this.status.data.title} />
                     <div className="small_space" />
                     <Select
-                        style={{ width: "7em" }}
+                        style={{ minWidth: "7em" }}
                         disabled={disabled}
-                        defaultValue={rawTag}
+                        value={rawTag}
                         onChange={this.onTagTypeChange}>
                         {this.tagList.map((value, index) =>
                             <Select.Option value={value} key={index}>
@@ -393,7 +438,7 @@ class DetailModal extends Component {
                     <SyntaxHighlighter
                         className="main_modal_highlighter"
                         style={docco}
-                        language={tag}
+                        language={language}
                         showLineNumbers>{this.status.data.code}
                     </SyntaxHighlighter>
                 </div>

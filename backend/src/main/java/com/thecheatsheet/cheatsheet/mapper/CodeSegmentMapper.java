@@ -12,7 +12,7 @@ public interface CodeSegmentMapper {
                        @Param("code") String code, @Param("tag") String tag, @Param("createAt") long createAt,
                        @Param("lastModify") long lastModify);
 
-    @Update("update cheatsheet set title=#{title}, description=#{description}, code=#{code}, language=#{tag}, lastModify=#{lastModify} where id=#{id}")
+    @Update("update cheatsheet set title=#{title}, description=#{description}, code=#{code}, tag=#{tag}, lastModify=#{lastModify} where id=#{id}")
     void UpdateCodeSegment(@Param("id") String id, @Param("title") String title,
                            @Param("description") String description, @Param("code") String code, @Param("tag") String tag,
                            @Param("lastModify") long lastModify);

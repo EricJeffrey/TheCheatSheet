@@ -57,3 +57,7 @@ frontend/thecheatsheet/yarn-error.log*
 
 # foobar
 foobar.*
+
+cheatsheet.war
+
+backend/src/main/resources/static

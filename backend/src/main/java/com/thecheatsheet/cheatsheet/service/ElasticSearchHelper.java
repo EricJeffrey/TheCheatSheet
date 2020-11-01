@@ -1,7 +1,9 @@
 package com.thecheatsheet.cheatsheet.service;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
@@ -10,7 +12,8 @@ import com.thecheatsheet.cheatsheet.entity.CodeSegmentEntity;
 
 public class ElasticSearchHelper {
 
-    private static final String ADDRESS = "http://192.168.31.14:9200/";
+    private static final String ADDRESS = "http://elasticsearch:9200/";
+    // private static final String ADDRESS = "http://localhost:9200/";
     private static final String INDEX_NAME = "codesegment";
     private static final String INDEX_ADDRESS = ADDRESS + INDEX_NAME;
     private static final Integer MAX_SEGMENTS_NUMBER = 1000;
@@ -63,6 +66,7 @@ public class ElasticSearchHelper {
         } else {
             dataJson.put("size", MAX_SEGMENTS_NUMBER);
         }
+        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
         String data = dataJson.toJSONString();
         HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
                 .header("Content-Type", "application/json")
@@ -104,6 +108,7 @@ public class ElasticSearchHelper {
             dataJson.put("from", pageSize * pageCount);
             dataJson.put("size", pageSize);
         }
+        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
         String data = dataJson.toJSONString();
         HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
                 .header("Content-Type", "application/json")
@@ -133,6 +138,7 @@ public class ElasticSearchHelper {
         JSONObject query = new JSONObject();
         query.put("match", match);
         dataJson.put("query", query);
+        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
         String data = dataJson.toJSONString();
         HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
                 .header("Content-Type", "application/json")

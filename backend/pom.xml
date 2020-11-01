@@ -10,10 +10,10 @@
 	</parent>
 	<groupId>com.thecheatsheet</groupId>
 	<artifactId>CheatSheet</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<packaging>war</packaging>
 	<name>CheatSheet</name>
-	<description>Demo project for Spring Boot</description>
+	<description>The one true CheatSheet</description>
 
 	<properties>
 		<java.version>11</java.version>

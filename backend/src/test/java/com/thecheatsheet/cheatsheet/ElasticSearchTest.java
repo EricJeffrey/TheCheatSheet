@@ -2,10 +2,10 @@ package com.thecheatsheet.cheatsheet;
 
 import com.thecheatsheet.cheatsheet.entity.CodeSegmentEntity;
 import com.thecheatsheet.cheatsheet.service.ElasticSearchHelper;
-import org.junit.jupiter.api.Test;
+// import org.junit.jupiter.api.Test;
 
 class ElasticSearchTest {
-    @Test
+    // @Test 
     void testEs() throws InterruptedException {
         System.out.println("create index: " + ElasticSearchHelper.createIndex());
 
