@@ -232,7 +232,7 @@ export default class App extends Component {
                     </div>
                 </Header>
                 <Layout style={{ width: "100%" }}>
-                    <Sider className="comon_theme" id="main_sider" theme="light">
+                    <Sider collapsible={true} className="comon_theme" id="main_sider" theme="light">
                         <Menu
                             id="main_menu"
                             onClick={this.onMenuClick}

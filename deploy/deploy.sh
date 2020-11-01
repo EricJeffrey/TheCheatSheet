@@ -2,6 +2,9 @@
 
 # build frontend -> cp to backend -> build backend -> cp to deploy/ -> run docker((podman -t hostnet) for fedora)-compose up 
 
+echo '停止服务'
+sudo docker-compose down --remove-orphans
+
 echo '请确保https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.2/elasticsearch-analysis-ik-7.9.2.zip已经下载到当前文件夹，任意键继续...'
 
 a=2
