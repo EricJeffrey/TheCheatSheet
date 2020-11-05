@@ -1,0 +1,37 @@
+version: "3.3"
+services: 
+    elasticsearch:
+        build:
+            context: ./
+            dockerfile: es.dockerfile
+        image: elasticsearch-cheatsheet
+        container_name: cheatsheet-elasticsearch
+        # ports: 
+        #     - 9200:9200
+        #     - 9300:9300
+        volumes: 
+            - /data/cheatsheet/elasticsearch:/usr/share/elasticsearch/data
+    mysql:
+        build: 
+            context: ./
+            dockerfile: db.dockerfile
+        image: mysql-cheatsheet # name/tag of the built image
+        container_name: cheatsheet-mysql
+        # ports: 
+        #     - 3306:3306
+        volumes: 
+            - /data/cheatsheet/db_mysql:/var/lib/mysql
+    cheatsheet:
+        build: 
+            context: ./
+            # note the .war need to be build manually
+            dockerfile: server.dockerfile
+        image: openjdk-cheatsheet
+        container_name: cheatsheet-server
+        ports: 
+            - 8686:8686
+        depends_on: 
+            - elasticsearch
+            - mysql
+        # volumes: 
+        #     - /path/to/project/data
