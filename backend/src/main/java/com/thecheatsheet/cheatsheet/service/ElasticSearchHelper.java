@@ -1,14 +1,14 @@
 package com.thecheatsheet.cheatsheet.service;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.thecheatsheet.cheatsheet.entity.CodeSegmentEntity;
+import com.thecheatsheet.cheatsheet.utils.HttpUtils;
 
 public class ElasticSearchHelper {
 
@@ -19,19 +19,19 @@ public class ElasticSearchHelper {
     private static final Integer MAX_SEGMENTS_NUMBER = 1000;
 
     private static final String INDEX_MAPPING = "{\"mappings\": {\"properties\": {\"id\":{\"type\": \"text\"},\"title\":{\"type\": \"text\",\"analyzer\": \"ik_max_word\",\"search_analyzer\": \"ik_smart\"},\"description\":{\"type\": \"text\",\"analyzer\": \"ik_max_word\",\"search_analyzer\": \"ik_smart\"},\"code\":{\"type\": \"text\",\"analyzer\": \"ik_max_word\",\"search_analyzer\": \"ik_smart\"},\"tag\":{\"type\": \"keyword\"},\"createAt\":{\"type\": \"long\"},\"lastModify\":{\"type\": \"long\"}}}}";
+    private static final JSONArray SORTS_JSON_ARRAY = new JSONArray(Collections.singletonList(Collections.singletonMap("createAt", "desc")));
+
+    private ElasticSearchHelper() {}
 
     private static boolean indexExist() {
         return HttpRequest.get(INDEX_ADDRESS, null, true).ok();
     }
 
     public static boolean createIndex() {
-        if (indexExist())
+        if (indexExist()) {
             return true;
-        String data = INDEX_MAPPING;
-        HttpRequest request = HttpRequest.put(INDEX_ADDRESS, null, true)
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length)
-                .send(data.getBytes());
+        }
+        HttpRequest request = HttpUtils.httpPut(INDEX_ADDRESS, INDEX_MAPPING);
         return request.ok();
     }
 
@@ -45,15 +45,9 @@ public class ElasticSearchHelper {
 
     private static boolean updateCodeSegment(CodeSegmentEntity codeSegment, boolean adding) {
         String path = adding ? "_create" : "_doc";
-        String data = JSONObject.toJSONString(codeSegment);
-        HttpRequest request = HttpRequest.put(
-                String.join("/", INDEX_ADDRESS, path, codeSegment.getId()),
-                null,
-                true)
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length)
-                .send(data);
-        JSONObject response = JSONObject.parseObject(request.body());
+        String data = JSON.toJSONString(codeSegment);
+        HttpRequest request = HttpUtils.httpPut(String.join("/", INDEX_ADDRESS, path, codeSegment.getId()), data);
+        JSONObject response = JSON.parseObject(request.body());
         return !response.containsKey("error");
     }
 
@@ -66,22 +60,17 @@ public class ElasticSearchHelper {
         } else {
             dataJson.put("size", MAX_SEGMENTS_NUMBER);
         }
-        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
+        dataJson.put("sort", SORTS_JSON_ARRAY);
         String data = dataJson.toJSONString();
-        HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length)
-                .send(data);
+        HttpRequest request = HttpUtils.httpGet(INDEX_ADDRESS + "/_search", data);
         String responseBody = request.body();
         if (request.ok()) {
-            List<CodeSegmentEntity> res = new ArrayList<>();
-            JSONObject resp = JSONObject.parseObject(responseBody);
+            JSONObject resp = JSON.parseObject(responseBody);
             JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");
-            for (int i = 0; i < hits.size(); i++)
-                res.add(hits.getJSONObject(i).getObject("_source", CodeSegmentEntity.class));
-            return res;
+            return hits.stream().map(o -> ((JSONObject) o).getObject("_source", CodeSegmentEntity.class))
+                    .collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public static List<CodeSegmentEntity> searchCodeSegments(String text) {
@@ -108,22 +97,16 @@ public class ElasticSearchHelper {
             dataJson.put("from", pageSize * pageCount);
             dataJson.put("size", pageSize);
         }
-        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
+        dataJson.put("sort", SORTS_JSON_ARRAY);
         String data = dataJson.toJSONString();
-        HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length)
-                .send(data);
+        HttpRequest request = HttpUtils.httpGet(INDEX_ADDRESS + "/_search", data);
         if (request.ok()) {
-            List<CodeSegmentEntity> res = new ArrayList<>();
-            JSONObject resp = JSONObject.parseObject(request.body());
+            JSONObject resp = JSON.parseObject(request.body());
             JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");
-            for (int i = 0; i < hits.size(); i++) {
-                res.add(hits.getJSONObject(i).getObject("_source", CodeSegmentEntity.class));
-            }
-            return res;
+            return hits.stream().map(o -> ((JSONObject) o).getObject("_source", CodeSegmentEntity.class))
+                    .collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public static List<CodeSegmentEntity> getCodeSegmentsByTag(String tag, boolean paging,
@@ -138,39 +121,28 @@ public class ElasticSearchHelper {
         JSONObject query = new JSONObject();
         query.put("match", match);
         dataJson.put("query", query);
-        dataJson.put("sort", new JSONArray(Arrays.asList(Map.of("createAt", "desc"))));
+        dataJson.put("sort", SORTS_JSON_ARRAY);
         String data = dataJson.toJSONString();
-        HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search")
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length)
-                .send(data);
+        HttpRequest request = HttpUtils.httpGet(INDEX_ADDRESS + "/_search", data);
         if (request.ok()) {
-            List<CodeSegmentEntity> res = new ArrayList<>();
-            JSONObject resp = JSONObject.parseObject(request.body());
+            JSONObject resp = JSON.parseObject(request.body());
             JSONArray hits = resp.getJSONObject("hits").getJSONArray("hits");
-            for (int i = 0; i < hits.size(); i++) {
-                res.add(hits.getJSONObject(i).getObject("_source", CodeSegmentEntity.class));
-            }
-            return res;
+            return hits.stream().map(o -> ((JSONObject) o).getObject("_source", CodeSegmentEntity.class))
+                    .collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 
     public static List<String> getAllTags() {
         String data = "{\"aggs\":{\"tags\":{\"terms\":{\"field\":\"tag\"}}},\"size\":0}";
-        HttpRequest request = HttpRequest.get(INDEX_ADDRESS + "/_search", null, true)
-                .header("Content-Type", "application/json")
-                .header("Content-Length", data.getBytes().length).send(data);
+        HttpRequest request = HttpUtils.httpGet(INDEX_ADDRESS + "/_search", data);
         if (request.ok()) {
-            List<String> res = new ArrayList<>();
-            JSONObject object = JSONObject.parseObject(request.body());
+            JSONObject object = JSON.parseObject(request.body());
             JSONArray tmpBuckets = object.getJSONObject("aggregations").getJSONObject("tags")
                     .getJSONArray("buckets");
-            for (int i = 0; i < tmpBuckets.size(); i++) {
-                res.add(tmpBuckets.getJSONObject(i).getString("key"));
-            }
-            return res;
+            return tmpBuckets.stream().map(o -> ((JSONObject) o).getString("key"))
+                    .collect(Collectors.toList());
         }
-        return null;
+        return Collections.emptyList();
     }
 }
