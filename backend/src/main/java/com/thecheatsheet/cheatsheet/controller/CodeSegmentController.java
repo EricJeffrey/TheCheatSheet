@@ -32,14 +32,15 @@ public class CodeSegmentController {
         codeSegmentMapper.UpdateCodeSegment(codeSegment.getId(), codeSegment.getTitle(), codeSegment.getDescription(),
                 codeSegment.getCode(), codeSegment.getTag(), codeSegment.getLastModify());
         // update ElasticSearch
-        if (!ElasticSearchHelper.updateCodeSegment(codeSegment))
+        if (!ElasticSearchHelper.updateCodeSegment(codeSegment)) {
             throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "ElasticSearch update failed");
+        }
     }
 
     @PostMapping("/codeSegment/add")
     public void add(@RequestBody String payload) {
         String id = UUID.randomUUID().toString();
-        long now = new Date().getTime();
+        long now = System.currentTimeMillis();
         JSONObject payloadJson = JSONObject.parseObject(payload);
         CodeSegmentEntity codeSegment = new CodeSegmentEntity(
                 id,
@@ -70,8 +71,8 @@ public class CodeSegmentController {
         int pageCountInt = 0, pageSizeInt = 0;
         if (paging) {
             try {
-                pageCountInt = Integer.valueOf(pageCount);
-                pageSizeInt = Integer.valueOf(pageSize);
+                pageCountInt = Integer.parseInt(pageCount);
+                pageSizeInt = Integer.parseInt(pageSize);
                 if (pageCountInt < 0 || pageSizeInt <= 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
                 }
@@ -98,8 +99,8 @@ public class CodeSegmentController {
         int pageCountInt = 0, pageSizeInt = 0;
         if (paging) {
             try {
-                pageCountInt = Integer.valueOf(pageCount);
-                pageSizeInt = Integer.valueOf(pageSize);
+                pageCountInt = Integer.parseInt(pageCount);
+                pageSizeInt = Integer.parseInt(pageSize);
                 if (pageCountInt < 0 || pageSizeInt <= 0) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST);
                 }
