@@ -262,8 +262,8 @@ class DetailModal extends Component {
     constructor(props) {
         super(props);
 
-        this.tagList = ["Text", "Linux", "C++", "Java", "Python", "Bash",
-            "JavaScript", "Go", "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
+        this.supportedTagList = ["Text", "Linux", "C++", "Java", "Python", "Bash", "JavaScript", "HTML", "CSS",
+            "RegularExpr", "Android", "Windows", "Cmd", "Go", "C#", "Kotlin", "TypeScript", "Dart", "Php", "Rust"];
         this.status = {
             visible: false,
             editable: false,
