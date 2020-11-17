@@ -24,7 +24,7 @@ echo '开始打包前端'
 cd frontend/thecheatsheet/ && npm install && npm run build && cd ../../
 
 echo '拷贝前端打包文件'
-mkdir backend/src/main/resources/static/ && rm -rf backend/src/main/resources/static/* && cp -rf frontend/thecheatsheet/build/* backend/src/main/resources/static/
+mkdir -p backend/src/main/resources/static/ && rm -rf backend/src/main/resources/static/* && cp -rf frontend/thecheatsheet/build/* backend/src/main/resources/static/
 
 echo '开始打包后端'
 cd backend && ./mvnw package -f pom.xml && cd ..

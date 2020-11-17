@@ -21,7 +21,6 @@ const DATA_TYPE_SEARCH = 3;
 
 const ERROR_MESSAGE_DATA = "获取数据失败";
 
-// FIXME tagList can not update - elasticsearch not responding very quickly
 export default class App extends Component {
     constructor(props) {
         super(props);
@@ -262,8 +261,8 @@ class DetailModal extends Component {
     constructor(props) {
         super(props);
 
-        this.tagList = ["Text", "Linux", "C++", "Java", "Python", "Bash",
-            "JavaScript", "Go", "C#", "Kotlin", "TypeScript", "Android", "Dart", "Php", "Rust"];
+        this.supportedTagList = ["Text", "Linux", "C++", "Java", "Python", "Bash", "JavaScript", "HTML", "CSS",
+            "RegularExpr", "Android", "Windows", "Cmd", "Go", "C#", "Kotlin", "TypeScript", "Dart", "Php", "Rust"];
         this.status = {
             visible: false,
             editable: false,
@@ -359,7 +358,7 @@ class DetailModal extends Component {
         this.status.lastSuccessJobData = Object.assign({}, this.status.data);
 
         if (this.status.adding && this.status.data.tag === "")
-            this.status.data.tag = this.tagList[0];
+            this.status.data.tag = this.supportedTagList[0];
 
         if (this.status.data === null)
             return <div></div>;
@@ -369,7 +368,7 @@ class DetailModal extends Component {
         var rawTag = "";
         if (this.status.data !== null)
             rawTag = this.status.data.tag;
-        if (rawTag === null || rawTag.length === 0) rawTag = this.tagList[0];
+        if (rawTag === null || rawTag.length === 0) rawTag = this.supportedTagList[0];
 
         // tag is for SyntaxHightlight
         var language = rawTag;
@@ -414,7 +413,7 @@ class DetailModal extends Component {
                         disabled={disabled}
                         value={rawTag}
                         onChange={this.onTagTypeChange}>
-                        {this.tagList.map((value, index) =>
+                        {this.supportedTagList.map((value, index) =>
                             <Select.Option value={value} key={index}>
                                 {value}
                             </Select.Option>)}
