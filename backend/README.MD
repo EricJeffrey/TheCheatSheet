@@ -1,1 +1,1 @@
-速查表项目后端代码，采用SpringBoot编写
+速查表项目后端代码，采用[CROW](https://crowcpp.org/)编写。

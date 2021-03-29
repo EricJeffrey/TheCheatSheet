@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 开发环境版本，包含了有帮助的命令行警告 -->
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- 引入样式 -->
+    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
+    <!-- 引入组件库 -->
+    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0px;
+            height: 100%;
+            background-color: whitesmoke;
+        }
+
+        .el-row {
+            margin-bottom: 20px;
+        }
+
+        .el-row:last-child {
+            margin-bottom: 0;
+        }
+    </style>
+
+    <script>
+        window.onload = function () {
+            var app = new Vue({
+                el: "#app"
+            })
+        }
+    </script>
+</head>
+
+<body>
+
+    <div id="app">
+        <el-container>
+            <el-aside>
+                <!-- logo -->
+                <el-row>
+                    <el-col>CheatSheet</el-col>
+                </el-row>
+                <!-- tags -->
+                <el-row>
+                    <el-col>标签</el-col>
+                    <el-col>
+                        <div>
+                            <el-link>linux</el-link>
+                            <el-link>bash</el-link>
+                            <el-link>Java</el-link>
+                            <el-link>python</el-link>
+                            <el-link>C++</el-link>
+                            <el-link>MySQL</el-link>
+                            <el-link>Windows</el-link>
+                            <el-link>Elasticsearch</el-link>
+                        </div>
+                    </el-col>
+                </el-row>
+                <el-button>Github</el-button>
+            </el-aside>
+            <el-container>
+                <!-- 搜索框与头像 -->
+                <el-header>
+                    <el-row type="flex" justify="end" :gutter="10">
+                        <span>
+                            <el-input v-model="input" placeholder="请输入内容" prefix-icon="el-icon-search">
+                            </el-input>
+                        </span>
+                        <span>
+                            <el-button>新增</el-button>
+                        </span>
+                        <span>
+                            <el-dropdown>
+                                <el-avatar icon="el-icon-user-solid"></el-avatar>
+                                <el-dropdown-menu slot="dropdown">
+                                    <el-dropdown-item >
+                                        <el-link href="">个人中心</el-link>
+                                    </el-dropdown-item>
+                                    <el-dropdown-item>登出</el-dropdown-item>
+                                </el-dropdown-menu>
+                            </el-dropdown>
+                        </span>
+                    </el-row>
+                </el-header>
+                <!-- 代码段数据主体 -->
+                <el-main>
+                    <el-row type="flex" gutter="10">
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                    </el-row>
+                    <el-row type="flex" gutter="10">
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                        <el-col :span="6">
+                            <el-card shadow="hover">
+                                <div>标题</div>
+                                <div>代码段描述</div>
+                                <div>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                    代码段内容<br>
+                                </div>
+                                <div>
+                                    <el-button type="text">点赞</el-button>
+                                    <div style="display: flex; float: right;">
+                                        <el-button type="text">编辑</el-button>
+                                        <el-button type="text">复制</el-button>
+                                    </div>
+                                </div>
+                            </el-card>
+                        </el-col>
+                    </el-row>
+                </el-main>
+            </el-container>
+        </el-container>
+    </div>
+</body>
+
+</html>

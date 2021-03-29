@@ -57,3 +57,5 @@ frontend/thecheatsheet/yarn-error.log*
 
 # foobar
 foobar.*
+
+httplib.*
