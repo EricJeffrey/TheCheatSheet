@@ -29,7 +29,7 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+#.vscode/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -59,3 +59,7 @@ frontend/thecheatsheet/yarn-error.log*
 foobar.*
 
 httplib.*
+
+*.exe
+*.obj
+*.out
