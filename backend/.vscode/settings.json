@@ -1,9 +1,9 @@
 {
     "todo-tree.filtering.excludeGlobs": [
-        "lib/**"
+        "lib"
     ],
     "cmake.configureSettings": {
-        "VCPKG_TARGET_TRIPLET":"x64-linux",
+        "VCPKG_TARGET_TRIPLET": "x64-linux",
         "CMAKE_TOOLCHAIN_FILE": "/home/sjf/coding/vcpkg/scripts/buildsystems/vcpkg.cmake"
     },
     "files.associations": {

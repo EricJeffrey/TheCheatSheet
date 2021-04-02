@@ -37,7 +37,11 @@ public:
           mTagList(tagList) {}
     ~CodeSegment() {}
 
-    
+    // mTitle and mDescription and mContent and mTagList equal
+    bool operator==(const CodeSegment &segment) const {
+        return mTitle == segment.mTitle && mDescription == segment.mDescription &&
+               mContent == segment.mContent && mTagList == segment.mTagList;
+    }
 
     void setId(const string &id) { mId = id; }
     void setTitle(const string &title) { mTitle = title; }

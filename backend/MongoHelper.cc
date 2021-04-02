@@ -17,7 +17,7 @@ using bsoncxx::builder::stream::open_document;
 using queryOption = mongocxx::options::find;
 using pipeline = mongocxx::pipeline;
 
-bsoncxx::document::view_or_value toMongoDoc(const CodeSegment &codeSegment, bool ignoreId) {
+bsoncxx::document::view_or_value toBsonDoc(const CodeSegment &codeSegment, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
         builder.append(kvp(CodeSegment::KEY_ID, codeSegment.mId));
@@ -35,7 +35,7 @@ bsoncxx::document::view_or_value toMongoDoc(const CodeSegment &codeSegment, bool
     return builder.extract();
 }
 
-bsoncxx::document::view_or_value toMongoDoc(const User &user, bool ignoreId) {
+bsoncxx::document::view_or_value toBsonDoc(const User &user, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
         builder.append(kvp(User::KEY_ID, user.mId));
@@ -50,7 +50,7 @@ bsoncxx::document::view_or_value toMongoDoc(const User &user, bool ignoreId) {
     return builder.extract();
 }
 
-bsoncxx::document::view_or_value toMongoDoc(const Tag &tag, bool ignoreId) {
+bsoncxx::document::view_or_value toBsonDoc(const Tag &tag, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
         builder.append(kvp(Tag::KEY_ID, tag.mId));
@@ -60,7 +60,7 @@ bsoncxx::document::view_or_value toMongoDoc(const Tag &tag, bool ignoreId) {
 
 CodeSegment toCodeSegment(const bsoncxx::document::view &doc) {
     CodeSegment codeSegment;
-    codeSegment.setId(doc[CodeSegment::KEY_ID].get_utf8().value.to_string());
+    codeSegment.setId(doc[CodeSegment::KEY_ID].get_oid().value.to_string());
     codeSegment.setTitle(doc[CodeSegment::KEY_TITLE].get_utf8().value.to_string());
     codeSegment.setDescription(doc[CodeSegment::KEY_DESCRIPTION].get_utf8().value.to_string());
     codeSegment.setContent(doc[CodeSegment::KEY_CONTENT].get_utf8().value.to_string());
@@ -75,7 +75,7 @@ CodeSegment toCodeSegment(const bsoncxx::document::view &doc) {
 
 User toUser(const bsoncxx::document::view &doc) {
     User user;
-    user.setId(doc[User::KEY_ID].get_utf8().value.to_string());
+    user.setId(doc[User::KEY_ID].get_oid().value.to_string());
     user.setName(doc[User::KEY_NAME].get_utf8().value.to_string());
     user.setEmail(doc[User::KEY_EMAIL].get_utf8().value.to_string());
     user.setPassword(doc[User::KEY_PASSWORD].get_utf8().value.to_string());
@@ -87,14 +87,14 @@ User toUser(const bsoncxx::document::view &doc) {
 
 Tag toTag(const bsoncxx::document::view &doc) {
     Tag tag;
-    tag.setId(doc[Tag::KEY_ID].get_utf8().value.to_string());
+    tag.setId(doc[Tag::KEY_ID].get_oid().value.to_string());
     tag.setValue(doc[Tag::KEY_VALUE].get_utf8().value.to_string());
     return tag;
 }
 
 bool addCodeSegment(const CodeSegment &segment) {
     auto collectionCodeSegment = mongoCollection(MongoContext::COLLECTION_CODE_SEGMENT);
-    auto res = collectionCodeSegment.insert_one(toMongoDoc(segment));
+    auto res = collectionCodeSegment.insert_one(toBsonDoc(segment));
     return res.has_value();
 }
 
@@ -106,20 +106,20 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
     // set sort order
     switch (sortBy) {
     case SortOrder::lastModified:
-        // timestamp, small->large
-        options.sort(streamDocument{} << "lastModified" << 1 << finalize);
+        // timestamp, the larger, the nearer
+        options.sort(streamDocument{} << CodeSegment::KEY_LAST_MODIFIED << -1 << finalize);
         break;
     case SortOrder::favorNumber:
         // count, large->small
-        options.sort(streamDocument{} << "favorNumber" << -1 << finalize);
+        options.sort(streamDocument{} << CodeSegment::KEY_FAVOR_NUMBER << -1 << finalize);
         break;
     }
     auto collectionCodeSegment = mongoCollection(MongoContext::COLLECTION_CODE_SEGMENT);
     // search all
     if (tag.empty()) {
         auto cursor = collectionCodeSegment.find({}, options.skip(page - 1).limit(pageSize));
-        while (cursor.begin() != cursor.end()) {
-            res.emplace_back(toCodeSegment(*cursor.begin()));
+        for (auto &&doc : cursor) {
+            res.emplace_back(toCodeSegment(doc));
         }
     }
     // search by tag
@@ -136,8 +136,9 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
                                  << open_document << "$eq" << tag << close_document
                                  << close_document << finalize,
                 options);
-            while (cursor.begin() != cursor.end())
-                res.emplace_back(toCodeSegment(*cursor.begin()));
+            for (auto &&doc : cursor) {
+                res.emplace_back(toCodeSegment(doc));
+            }
         }
     }
     return res;
@@ -159,21 +160,27 @@ int32_t countCodeSegment(const string &tag) {
     return res;
 }
 
-// segment should has <mId> refer the one to update
+// segment.mId should be non-empty and refer to the one to update
 bool updateCodeSegment(const CodeSegment &segment) {
     auto collectionCodeSegment = mongoCollection(MongoContext::COLLECTION_CODE_SEGMENT);
     return collectionCodeSegment
         .update_one(streamDocument{} << CodeSegment::KEY_ID << segment.mId << finalize,
-                    toMongoDoc(segment))
+                    toBsonDoc(segment))
         .has_value();
+}
+
+bool addTag(const Tag &tag) {
+    auto collectionTag = mongoCollection(MongoContext::COLLECTION_TAG);
+    return collectionTag.insert_one(toBsonDoc(tag)).has_value();
 }
 
 vector<Tag> getTags() {
     vector<Tag> res;
     auto collectionTag = mongoCollection(MongoContext::COLLECTION_TAG);
     auto cursor = collectionTag.find({});
-    while (cursor.begin() != cursor.end())
-        res.emplace_back(toTag(*(cursor.begin())));
+    for (auto &&doc : cursor) {
+        res.emplace_back(toTag(doc));
+    }
     return res;
 }
 
@@ -200,8 +207,9 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
         }
         auto cursor =
             collectionCodeSegments.find(tmpFilter << close_array << close_document << finalize);
-        while (cursor.begin() != cursor.end())
-            res.emplace_back(toCodeSegment(*cursor.begin()));
+        for (auto &&doc : cursor) {
+            res.emplace_back(toCodeSegment(doc));
+        }
     }
     return res;
 }

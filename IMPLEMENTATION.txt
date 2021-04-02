@@ -38,6 +38,7 @@ NoSQL数据库实体
     搜索代码段
     编辑操作 - lastModified、createdAt字段由客户端设置
         新增代码段
+            新增tag - 客户端主动发起新增操作
         修改某个代码段
     用户操作
         注册 - 完成后自动登入
@@ -63,6 +64,7 @@ NoSQL数据库实体
     编辑
         更新某个代码段                                      - POST:updateCodeSegment:{codeSegmentId:xxx, {updatedData...}}
         新增代码段                                          - POST:addCodeSegment:{codeSegment}
+        新增tag                                             - POST:addTag:{tag}
 
 
 用例

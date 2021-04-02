@@ -12,6 +12,10 @@ struct Tag {
     string mId;
     string mValue;
 
+    Tag() = default;
+    ~Tag() = default;
+    Tag(const string &value) : mValue(value) {}
+
     void setId(const string &id) { mId = id; }
     void setValue(const string &value) { mValue = value; }
 };
