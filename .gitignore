@@ -58,8 +58,6 @@ frontend/thecheatsheet/yarn-error.log*
 # foobar
 foobar.*
 
-httplib.*
-
 *.exe
 *.obj
 *.out

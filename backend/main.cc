@@ -1,8 +1,13 @@
+
 #include "lib/httplib.h"
-#include <bsoncxx/json.hpp>
+
+#include "MongoHelper.hpp"
+#include "EsHelper.hpp"
+
 #include <bsoncxx/builder/stream/array.hpp>
 #include <bsoncxx/builder/stream/document.hpp>
 #include <bsoncxx/builder/stream/helpers.hpp>
+#include <bsoncxx/json.hpp>
 #include <mongocxx/client.hpp>
 #include <mongocxx/instance.hpp>
 
@@ -25,6 +30,7 @@ void mongoTest() {
     auto collection = db.collection("test");
     collection.insert_one(doc_value.view());
     mongocxx::cursor cursor = collection.find({});
+    
     for (auto doc : cursor) {
         std::cout << bsoncxx::to_json(doc) << "\n";
     }
@@ -35,11 +41,24 @@ void serverTest() {
     server.Get("/", [&](const httplib::Request &request, httplib::Response &response) {
         response.set_content("hello world", "text/plain");
     });
+    server.Get("/codeSegments", [&](const httplib::Request &request, httplib::Response &response) {
+        const char PARAM_KEY_SORTBY[] = "sortBy";
+        const char PARAM_KEY_TAG[] = "tag";
+        if (request.has_param(PARAM_KEY_TAG)) {
+            
+        }
+        if (request.has_param(PARAM_KEY_SORTBY)) {
+
+        }
+        auto paramSortBy = request.get_param_value("sortBy");
+        auto paramTag = request.get_param_value("tag");
+
+    });
     server.listen("0.0.0.0", 8000);
 }
 
 int main(int argc, char const *argv[]) {
     mongoTest();
-    // serverTest();
+    serverTest();
     return 0;
 }

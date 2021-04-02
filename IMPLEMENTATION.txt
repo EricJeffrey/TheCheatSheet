@@ -1,23 +1,23 @@
 数据对象
-    用户 = 标识 + 电子邮箱 + 名称 + 密码 + 赞过的代码段列表
-    代码段 = 标识 + 标题 + 描述 + 内容 + 点赞数 + 标签列表
+    用户 = 电子邮箱 + 名称 + 密码 + 赞过的代码段列表
+    代码段 = 标题 + 描述 + 内容 + 点赞数 + 标签列表 + 最后修改时间
+    使用MongoDB自动生成的ID作为标识
 
 NoSQL数据库实体
     用户
-        id              - 标识
         email           - 电子邮箱
         name            - 名称
         password        - 密码
         favors          - 赞过的代码段列表
     代码段 codeSegment
-        id              - 标识
         title           - 标题
         description     - 描述
         content         - 内容
-        thumbUpCount    - 点赞数
+        createdAt       - 创建时间
+        lastModified    - 最后修改时间
+        favorNumber     - 点赞数
         tagList         - 标签列表
     标签
-        id              - 标识
         value           - 标签值
 
 
@@ -25,9 +25,9 @@ NoSQL数据库实体
     自动登录
         登录成功设置cookie实现
         登录成功跳转到首页
-    浏览查看 - 分页固定
+    浏览查看 - 分页固定，每页的数目由客户端决定，响应数据包含总数目
         分页浏览所有代码
-            按时间顺序
+            按修改时间由近及远顺序
             按点赞数排序分页浏览
         分页浏览某个标签的代码
             按时间顺序
@@ -36,7 +36,7 @@ NoSQL数据库实体
         复制代码段内容
         点赞代码段
     搜索代码段
-    编辑操作
+    编辑操作 - lastModified、createdAt字段由客户端设置
         新增代码段
         修改某个代码段
     用户操作
@@ -52,12 +52,14 @@ NoSQL数据库实体
         登录                                                - POST:login:{[name: xxx|email: xxx], password: xxx}
         注册                                                - POST:register:{email: xxx, name: xxx, password: xxx}
         更新密码                                            - POST:updatePassword:{email: xxx, oldPassword: xxx, newPassword: xxx}
-        获取用户赞过的第n页数据                             - GET:userFavor?page=n
+        获取用户赞过的代码段第n页及总数                     - GET:userFavors?page=n&pageSize=n
+        获取用户赞过的所有代码段ID                          - Get:userFavorsId?
     浏览
-        按[时间顺序|点赞数排序]获取[某个标签]的第n页数据    - GET:codeSegments?sortBy=[favorNumber|time]&[tag=xxx]
+        按[时间顺序|点赞数顺序]
+            获取[某个标签]的第n页代码段及总数               - GET:codeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
         获取所有标签                                        - GET:tagList
         赞某个代码段                                        - POST:favor{userId: xxx, codeSegmentId=xxx}
-        获取第n页的搜索结果                                 - GET:search?text=xxx&page=n
+        获取第n页的搜索结果及总数                           - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
         更新某个代码段                                      - POST:updateCodeSegment:{codeSegmentId:xxx, {updatedData...}}
         新增代码段                                          - POST:addCodeSegment:{codeSegment}
@@ -164,12 +166,14 @@ NoSQL数据库实体
                     修改成功
                     修改失败
 
-杂项约束
-    固定分页
+杂项
+    固定分页 - 获取数据时同时获取数目
+    使用skip+limit(offset+limit)方式进行分页 - 百万数据量可能会产生性能问题
     每个代码段对应多个标签
     默认时间顺序
     登录/登出后跳转到首页
     搜索结果不支持按标签分类
+    仅在详情页面显示点赞按钮
 
 
 可扩展

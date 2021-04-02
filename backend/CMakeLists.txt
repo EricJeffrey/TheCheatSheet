@@ -2,16 +2,19 @@ cmake_minimum_required(VERSION 3.0.0)
 
 project(cheatsheet_backend VERSION 0.1.0)
 
-add_definitions("-std=c++17")
-add_subdirectory(lib)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_BUILD_TYPE "Debug")
+set(CMAKE_CXX_FLAGS_DEBUG "$ENV{CXXFLAGS} -O0 -Wall -g -ggdb")
+set(CMAKE_CXX_FLAGS_RELEASE "$ENV{CXXFLAGS} -O3 -Wall")
 
 include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
 conan_basic_setup()
 
-# message("--${CMAKE_BINARY_DIR}")
-# message("--${CONAN_LIBS}")
+add_subdirectory(lib)
+add_subdirectory(test)
 
-add_executable(cheatsheet_backend main.cc)
+aux_source_directory(. DIR_SRCS)
+add_executable(cheatsheet_backend ${DIR_SRCS})
 
 target_link_libraries(${PROJECT_NAME} httplib)
 target_link_libraries(${PROJECT_NAME} pthread)
