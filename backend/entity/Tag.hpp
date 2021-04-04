@@ -15,6 +15,7 @@ struct Tag {
     Tag() = default;
     ~Tag() = default;
     Tag(const string &value) : mValue(value) {}
+    bool operator==(const Tag &t) const { return mValue == t.mValue; }
 
     void setId(const string &id) { mId = id; }
     void setValue(const string &value) { mValue = value; }

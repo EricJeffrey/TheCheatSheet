@@ -1,8 +1,8 @@
 
 #include "lib/httplib.h"
 
-#include "MongoHelper.hpp"
-#include "EsHelper.hpp"
+#include "mongohelper/MongoHelper.hpp"
+#include "elastichelper/EsHelper.hpp"
 
 #include <bsoncxx/builder/stream/array.hpp>
 #include <bsoncxx/builder/stream/document.hpp>

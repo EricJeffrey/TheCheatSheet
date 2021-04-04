@@ -19,22 +19,10 @@ struct MongoContext {
     static string COLLECTION_TAG;
 };
 
-struct Context {
+mongocxx::pool::entry mongoClient();
 
-    Context() {}
-    ~Context() {}
-};
-
-inline mongocxx::pool::entry mongoClient() {
-    static mongocxx::pool connectionPool(MongoContext::Uri);
-    return connectionPool.acquire();
-}
-
-inline mongocxx::collection mongoCollection(const string &collectionName) {
-    auto clientEntry = mongoClient();
-    auto &client = *clientEntry;
-    auto collection = client[MongoContext::DBName][collectionName];
-    return collection;
-}
+// Get collection, the lifetime of collection should be within the lifetime of client.
+mongocxx::collection mongoCollection(const mongocxx::pool::entry &clientEntry,
+                                     const string &collectionName);
 
 #endif // CONTEXT_HPP

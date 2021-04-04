@@ -37,7 +37,7 @@ NoSQL数据库实体
         点赞代码段
     搜索代码段
     编辑操作 - lastModified、createdAt字段由客户端设置
-        新增代码段
+        新增代码段 - 代码段标题不可重复
             新增tag - 客户端主动发起新增操作
         修改某个代码段
     用户操作
@@ -65,6 +65,7 @@ NoSQL数据库实体
         更新某个代码段                                      - POST:updateCodeSegment:{codeSegmentId:xxx, {updatedData...}}
         新增代码段                                          - POST:addCodeSegment:{codeSegment}
         新增tag                                             - POST:addTag:{tag}
+        删除tag                                             - POST:deleteTag:{tag}
 
 
 用例

@@ -1,7 +1,8 @@
 
 enable_testing()
 
-add_executable(MongoTest MongoTest.cc ../MongoHelper.cc ../Context.cc)
+aux_source_directory(../mongohelper/ TEST_SRC_DIRS)
+add_executable(MongoTest MongoTest.cc ${TEST_SRC_DIRS})
 target_link_libraries(MongoTest ${CONAN_LIBS})
 
 include(GoogleTest)

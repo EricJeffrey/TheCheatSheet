@@ -22,10 +22,16 @@ public:
     string mPassword;
     vector<string> mFavors;
 
-    User() {}
-    ~User() {}
+    User() = default;
+    ~User() = default;
+    User(const string &name, const string &email, const string &password)
+        : mName(name), mEmail(email), mPassword(password) {}
+    bool operator==(const User &t) const {
+        return mName == t.mName && mEmail == t.mEmail && mPassword == t.mPassword &&
+               mFavors == t.mFavors;
+    }
 
-    void setId(const string &id) {mId = id;}
+    void setId(const string &id) { mId = id; }
     void setName(const string &name) { mName = name; }
     void setEmail(const string &email) { mEmail = email; }
     void setPassword(const string &password) { mPassword = password; }

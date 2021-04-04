@@ -1,7 +1,6 @@
 #if !defined(HANDLER_HPP)
 #define HANDLER_HPP
 
-#include "Context.hpp"
 #include "lib/httplib.h"
 
 void codeSements(const httplib::Request &request, httplib::Response &response) {
