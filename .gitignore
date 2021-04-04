@@ -29,7 +29,7 @@ build/
 !**/src/test/**/build/
 
 ### VS Code ###
-.vscode/
+#.vscode/
 
 # See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
@@ -58,7 +58,6 @@ frontend/thecheatsheet/yarn-error.log*
 # foobar
 foobar.*
 
-elasticsearch-analysis-ik-7.9.2.zip
-cheatsheet.war
-
-backend/src/main/resources/static
+*.exe
+*.obj
+*.out
