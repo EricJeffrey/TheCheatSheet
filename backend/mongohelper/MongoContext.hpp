@@ -8,6 +8,8 @@
 
 using std::string;
 
+// helpers for mongodb
+namespace mongohelper {
 // MongoDB related stuff
 struct MongoContext {
     // This should be done only once
@@ -24,5 +26,5 @@ mongocxx::pool::entry mongoClient();
 // Get collection, the lifetime of collection should be within the lifetime of client.
 mongocxx::collection mongoCollection(const mongocxx::pool::entry &clientEntry,
                                      const string &collectionName);
-
+} // namespace mongohelper
 #endif // CONTEXT_HPP

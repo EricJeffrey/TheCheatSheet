@@ -2,7 +2,7 @@
 #include "lib/httplib.h"
 
 #include "mongohelper/MongoHelper.hpp"
-#include "elastichelper/EsHelper.hpp"
+#include "eshelper/EsHelper.hpp"
 
 #include <bsoncxx/builder/stream/array.hpp>
 #include <bsoncxx/builder/stream/document.hpp>

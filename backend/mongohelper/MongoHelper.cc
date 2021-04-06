@@ -9,6 +9,7 @@ using basicDocument = bsoncxx::builder::basic::document;
 using basicSubArray = bsoncxx::builder::basic::sub_array;
 using basicArray = bsoncxx::builder::basic::array;
 using streamDocument = bsoncxx::builder::stream::document;
+using bsoncxx::oid;
 using bsoncxx::builder::basic::kvp;
 using bsoncxx::builder::stream::close_array;
 using bsoncxx::builder::stream::close_document;
@@ -18,11 +19,12 @@ using bsoncxx::builder::stream::open_document;
 
 using queryOption = mongocxx::options::find;
 using pipeline = mongocxx::pipeline;
-
+namespace mongohelper {
 bsoncxx::document::view_or_value toBsonDoc(const CodeSegment &codeSegment, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
-        builder.append(kvp(CodeSegment::KEY_ID, bsoncxx::oid(codeSegment.mId)));
+        builder.append(kvp(CodeSegment::KEY_ID, oid(codeSegment.mId)));
+    builder.append(kvp(CodeSegment::KEY_ES_ID, codeSegment.mEsId));
     builder.append(kvp(CodeSegment::KEY_TITLE, codeSegment.mTitle));
     builder.append(kvp(CodeSegment::KEY_DESCRIPTION, codeSegment.mDescription));
     builder.append(kvp(CodeSegment::KEY_CONTENT, codeSegment.mContent));
@@ -30,8 +32,8 @@ bsoncxx::document::view_or_value toBsonDoc(const CodeSegment &codeSegment, bool 
     builder.append(kvp(CodeSegment::KEY_LAST_MODIFIED, codeSegment.mLastModified));
     builder.append(kvp(CodeSegment::KEY_FAVOR_NUMBER, codeSegment.mFavorNumber));
     builder.append(kvp(CodeSegment::KEY_TAG_LIST, [&codeSegment](basicSubArray child) {
-        for (auto &&v : codeSegment.mTagList) {
-            child.append(v);
+        for (auto &&tmpId : codeSegment.mTagList) {
+            child.append(oid(tmpId));
         }
     }));
     return builder.extract();
@@ -40,13 +42,13 @@ bsoncxx::document::view_or_value toBsonDoc(const CodeSegment &codeSegment, bool 
 bsoncxx::document::view_or_value toBsonDoc(const User &user, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
-        builder.append(kvp(User::KEY_ID, bsoncxx::oid(user.mId)));
+        builder.append(kvp(User::KEY_ID, oid(user.mId)));
     builder.append(kvp(User::KEY_NAME, user.mName));
     builder.append(kvp(User::KEY_EMAIL, user.mEmail));
     builder.append(kvp(User::KEY_PASSWORD, user.mPassword));
     builder.append(kvp(User::KEY_FAVORS, [&user](basicSubArray child) {
-        for (auto &&v : user.mFavors) {
-            child.append(v);
+        for (auto &&tmpId : user.mFavors) {
+            child.append(oid(tmpId));
         }
     }));
     return builder.extract();
@@ -55,7 +57,7 @@ bsoncxx::document::view_or_value toBsonDoc(const User &user, bool ignoreId) {
 bsoncxx::document::view_or_value toBsonDoc(const Tag &tag, bool ignoreId) {
     basicDocument builder;
     if (!ignoreId)
-        builder.append(kvp(Tag::KEY_ID, bsoncxx::oid(tag.mId)));
+        builder.append(kvp(Tag::KEY_ID, oid(tag.mId)));
     builder.append(kvp(Tag::KEY_VALUE, tag.mValue));
     return builder.extract();
 }
@@ -63,6 +65,7 @@ bsoncxx::document::view_or_value toBsonDoc(const Tag &tag, bool ignoreId) {
 CodeSegment toCodeSegment(const bsoncxx::document::view &doc) {
     CodeSegment codeSegment;
     codeSegment.setId(doc[CodeSegment::KEY_ID].get_oid().value.to_string());
+    codeSegment.setEsId(doc[CodeSegment::KEY_ES_ID].get_utf8().value.to_string());
     codeSegment.setTitle(doc[CodeSegment::KEY_TITLE].get_utf8().value.to_string());
     codeSegment.setDescription(doc[CodeSegment::KEY_DESCRIPTION].get_utf8().value.to_string());
     codeSegment.setContent(doc[CodeSegment::KEY_CONTENT].get_utf8().value.to_string());
@@ -71,7 +74,7 @@ CodeSegment toCodeSegment(const bsoncxx::document::view &doc) {
     codeSegment.setFavorNumber(doc[CodeSegment::KEY_FAVOR_NUMBER].get_int32().value);
     const auto &tagArray = doc[CodeSegment::KEY_TAG_LIST].get_array().value;
     std::transform(tagArray.begin(), tagArray.end(), std::back_inserter(codeSegment.mTagList),
-                   [](const bsoncxx::array::element &v) { return v.get_utf8().value.to_string(); });
+                   [](const bsoncxx::array::element &v) { return v.get_oid().value.to_string(); });
     return codeSegment;
 }
 
@@ -83,7 +86,7 @@ User toUser(const bsoncxx::document::view &doc) {
     user.setPassword(doc[User::KEY_PASSWORD].get_utf8().value.to_string());
     const auto &favorsArray = doc[User::KEY_FAVORS].get_array().value;
     std::transform(favorsArray.begin(), favorsArray.end(), std::back_inserter(user.mFavors),
-                   [](const bsoncxx::array::element &v) { return v.get_utf8().value.to_string(); });
+                   [](const bsoncxx::array::element &v) { return v.get_oid().value.to_string(); });
     return user;
 }
 
@@ -135,11 +138,12 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
     // search by tag
     else {
         auto cursor = collectionCodeSegment.find(
-            streamDocument{} << CodeSegment::KEY_TAG_LIST << tagId << finalize, options);
+            streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize, options);
         for (auto &&doc : cursor) {
             res.emplace_back(toCodeSegment(doc));
         }
     }
+    res.shrink_to_fit();
     return res;
 }
 
@@ -166,7 +170,7 @@ int32_t countCodeSegment(const string &tagId) {
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     pipeline pipe{};
     if (!tagId.empty())
-        pipe.match(streamDocument{} << CodeSegment::KEY_TAG_LIST << tagId << finalize);
+        pipe.match(streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize);
     pipe.count(fieldName);
     auto cursor = collectionCodeSegment.aggregate(pipe);
     auto iterator = cursor.begin();
@@ -183,12 +187,23 @@ bool updateCodeSegment(const CodeSegment &segment) {
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
 
         auto replaceRes = collectionCodeSegment.replace_one(
-            streamDocument{} << CodeSegment::KEY_ID << bsoncxx::oid(segment.mId) << finalize,
+            streamDocument{} << CodeSegment::KEY_ID << oid(segment.mId) << finalize,
             toBsonDoc(segment));
         res = replaceRes.has_value() && replaceRes.value().matched_count() == 1;
     }
     return res;
 }
+
+// bool removeTagOfCodeSegment(const string &segmentId, const string &tagId) {
+//     auto clientEntry = mongoClient();
+//     auto collectionCodeSegment =
+//         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
+//     auto updateRes = collectionCodeSegment.update_one(
+//         streamDocument{} << CodeSegment::KEY_ID << oid(segmentId) << finalize,
+//         streamDocument{} << "$pull" << open_document << CodeSegment::KEY_TAG_LIST << oid(tagId)
+//                          << close_document << finalize);
+//     return updateRes.has_value() && updateRes.value().modified_count() == 1;
+// }
 
 boost::optional<string> addTag(const Tag &tag) {
     auto clientEntry = mongoClient();
@@ -227,15 +242,15 @@ bool favor(const string &userId, const string &codeSegmentId) {
     auto clientEntry = mongoClient();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto updateUserRes = collectionUser.update_one(
-        streamDocument{} << User::KEY_ID << bsoncxx::oid(userId) << finalize,
-        streamDocument{} << "$addToSet" << open_document << User::KEY_FAVORS << codeSegmentId
+        streamDocument{} << User::KEY_ID << oid(userId) << finalize,
+        streamDocument{} << "$addToSet" << open_document << User::KEY_FAVORS << oid(codeSegmentId)
                          << close_document << finalize);
     // user has not favored it before, update favorNumber of the codeSegment
     if (updateUserRes.has_value() && updateUserRes.value().modified_count() > 0) {
         auto collectionCodeSegment =
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
         auto updateRes = collectionCodeSegment.update_one(
-            streamDocument{} << CodeSegment::KEY_ID << bsoncxx::oid(codeSegmentId) << finalize,
+            streamDocument{} << CodeSegment::KEY_ID << oid(codeSegmentId) << finalize,
             streamDocument{} << "$inc" << open_document << CodeSegment::KEY_FAVOR_NUMBER << 1
                              << close_document << finalize);
         res = updateRes.has_value() && updateRes.value().modified_count() == 1;
@@ -251,7 +266,7 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
     if (favorsIds.size() > (size_t)(startPos)) {
         auto arrayBuilder = basicArray{};
         for (int32_t i = 0; i < pageSize && (size_t)(i + startPos) < favorsIds.size(); i++) {
-            arrayBuilder.append(bsoncxx::oid(favorsIds[i + startPos]));
+            arrayBuilder.append(oid(favorsIds[i + startPos]));
         }
         auto tmpDoc = basicDocument{};
         tmpDoc.append(kvp("$in", arrayBuilder));
@@ -266,6 +281,7 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
             res.emplace_back(toCodeSegment(doc));
         }
     }
+    res.shrink_to_fit();
     return res;
 }
 
@@ -273,8 +289,8 @@ vector<string> getUserFavorsIds(const string &userId) {
     vector<string> res;
     auto clientEntry = mongoClient();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
-    auto findRes = collectionUser.find_one(streamDocument{} << User::KEY_ID << bsoncxx::oid(userId)
-                                                            << finalize);
+    auto findRes =
+        collectionUser.find_one(streamDocument{} << User::KEY_ID << oid(userId) << finalize);
     if (findRes.has_value())
         res = toUser(findRes.value()).mFavors;
     return res;
@@ -285,7 +301,7 @@ int32_t countUserFavors(const string &userId) {
     // int32_t res = 0;
     // auto collectionUser = mongoCollection(MongoContext::COLLECTION_USER);
     // auto cursor = collectionUser.aggregate(
-    //     pipeline{}.match(streamDocument{} << User::KEY_ID << bsoncxx::oid(userId) <<
+    //     pipeline{}.match(streamDocument{} << User::KEY_ID << oid(userId) <<
     //     finalize).count(fieldName));
     return getUserFavorsIds(userId).size();
 }
@@ -316,5 +332,5 @@ bool mongoIndexInit() {
                     .value.empty();
     return res;
 }
-
+} // namespace mongohelper
 #endif // MONGO_HELPER_CC

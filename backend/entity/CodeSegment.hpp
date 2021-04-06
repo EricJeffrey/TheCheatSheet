@@ -10,6 +10,7 @@ using std::vector;
 class CodeSegment {
 public:
     static constexpr char KEY_ID[] = "_id";
+    static constexpr char KEY_ES_ID[] = "esId";
     static constexpr char KEY_TITLE[] = "title";
     static constexpr char KEY_DESCRIPTION[] = "description";
     static constexpr char KEY_CONTENT[] = "content";
@@ -20,6 +21,8 @@ public:
 
     // mid is actually _id in mongo
     string mId;
+    // id for elasticsearch
+    string mEsId;
     string mTitle;
     string mDescription;
     string mContent;
@@ -29,12 +32,11 @@ public:
     vector<string> mTagList;
 
     CodeSegment() {}
-    CodeSegment(const string &id, const string &title, const string &description,
-                const string &content, int64_t createdAt, int64_t lastModified, int32_t favorNumber,
+    CodeSegment(const string &title, const string &description, const string &content,
+                int64_t createdAt, int64_t lastModified, int32_t favorNumber,
                 const vector<string> &tagList)
-        : mId(id), mTitle(title), mDescription(description), mContent(content),
-          mCreatedAt(createdAt), mLastModified(lastModified), mFavorNumber(favorNumber),
-          mTagList(tagList) {}
+        : mTitle(title), mDescription(description), mContent(content), mCreatedAt(createdAt),
+          mLastModified(lastModified), mFavorNumber(favorNumber), mTagList(tagList) {}
     ~CodeSegment() {}
 
     // mTitle and mDescription and mContent and mTagList equal
@@ -43,7 +45,14 @@ public:
                mContent == segment.mContent && mTagList == segment.mTagList;
     }
 
+    string toString() {
+        constexpr char sep[] = ", ";
+        return mTitle + sep + mDescription + sep + mContent + sep + std::to_string(mCreatedAt) +
+               sep + std::to_string(mLastModified);
+    }
+
     void setId(const string &id) { mId = id; }
+    void setEsId(const string &esId) { mEsId = esId; }
     void setTitle(const string &title) { mTitle = title; }
     void setDescription(const string &description) { mDescription = description; }
     void setContent(const string &content) { mContent = content; }

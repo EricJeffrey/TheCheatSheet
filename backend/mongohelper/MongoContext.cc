@@ -3,6 +3,7 @@
 
 #include "MongoContext.hpp"
 
+namespace mongohelper {
 mongocxx::instance MongoContext::Instance;
 mongocxx::uri MongoContext::Uri("mongodb://172.17.0.4:27017");
 string MongoContext::DBName = "cheatsheet";
@@ -20,4 +21,5 @@ mongocxx::collection mongoCollection(const mongocxx::pool::entry &clientEntry,
     return (*clientEntry)[MongoContext::DBName][collectionName];
 }
 
+} // namespace mongohelper
 #endif // CONTEXT_CC
