@@ -3,8 +3,8 @@
 
 #include "EsHelper.hpp"
 #include "../lib/httplib.h"
-#include "../lib/json.hpp"
 #include "EsContext.hpp"
+#include "nlohmann/json.hpp"
 
 using HttpError = httplib::Error;
 using HttpClient = httplib::Client;

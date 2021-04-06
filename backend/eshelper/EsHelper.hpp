@@ -2,8 +2,8 @@
 #define ElasticSearch_HELPER_HPP
 
 #include "../entity/CodeSegment.hpp"
-#include "../lib/json.hpp"
 #include "boost/optional/optional.hpp"
+#include "nlohmann/json.hpp"
 
 #include <initializer_list>
 
