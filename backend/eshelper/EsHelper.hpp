@@ -2,10 +2,11 @@
 #define ElasticSearch_HELPER_HPP
 
 #include "../entity/CodeSegment.hpp"
-#include "boost/optional/optional.hpp"
+#include "../util/Utility.hpp"
 #include "nlohmann/json.hpp"
 
 #include <initializer_list>
+#include <optional>
 
 using std::string;
 using std::vector;
@@ -22,7 +23,7 @@ NlohmannJson toJson(const CodeSegment &segment);
 CodeSegment toCodeSegment(const NlohmannJson &segmentJson);
 
 // return optional<esId>
-boost::optional<string> addCodeSegment(const CodeSegment &segment);
+std::optional<string> addCodeSegment(const CodeSegment &segment);
 
 // segment.mEsId is required for update, do insert if segment.mEsId not exist
 bool updateCodeSegment(const CodeSegment &segment);

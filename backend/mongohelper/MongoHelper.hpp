@@ -4,6 +4,7 @@
 #include "../entity/CodeSegment.hpp"
 #include "../entity/Tag.hpp"
 #include "../entity/User.hpp"
+#include "../util/Utility.hpp"
 #include "MongoContext.hpp"
 
 #include <bsoncxx/array/element.hpp>
@@ -19,19 +20,17 @@ CodeSegment toCodeSegment(const bsoncxx::document::view &doc);
 User toUser(const bsoncxx::document::view &doc);
 Tag toTag(const bsoncxx::document::view &doc);
 
-enum SortOrder { favorNumber, lastModified };
-
 /* CodeSegments related */
 // todo unique-conflict exception should be catched, exception shall occur only when internal error
 
 // return optional<id>, elements of segment.tagList is not checked
-boost::optional<string> addCodeSegment(const CodeSegment &segment);
+std::optional<string> addCodeSegment(const CodeSegment &segment);
 
 // page start from 1, pageSize is determined by frontend
 vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder sortBy,
                                     const string &tagId = "");
 
-boost::optional<CodeSegment> findCodeSegmentByTitle(const string &title);
+std::optional<CodeSegment> findCodeSegmentByTitle(const string &title);
 
 int32_t countCodeSegment(const string &tagId = "");
 
@@ -45,13 +44,13 @@ bool updateCodeSegment(const CodeSegment &segment);
 /* Tag related */
 
 // return optional<id>
-boost::optional<string> addTag(const Tag &tag);
+std::optional<string> addTag(const Tag &tag);
 
 vector<Tag> getTags();
 
 /* User related */
 
-boost::optional<string> addUser(const User &user);
+std::optional<string> addUser(const User &user);
 
 // favor a code segment, return false if user has favored before
 bool favor(const string &userId, const string &codeSegmentId);

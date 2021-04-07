@@ -97,12 +97,12 @@ Tag toTag(const bsoncxx::document::view &doc) {
     return tag;
 }
 
-boost::optional<string> addCodeSegment(const CodeSegment &segment) {
+std::optional<string> addCodeSegment(const CodeSegment &segment) {
     auto clientEntry = mongoClient();
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     auto insertRes = collectionCodeSegment.insert_one(toBsonDoc(segment));
-    boost::optional<string> res;
+    std::optional<string> res;
     if (insertRes.has_value()) {
         res = insertRes.value().inserted_id().get_oid().value.to_string();
     }
@@ -147,13 +147,13 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
     return res;
 }
 
-boost::optional<CodeSegment> findCodeSegmentByTitle(const string &title) {
+std::optional<CodeSegment> findCodeSegmentByTitle(const string &title) {
     auto clientEntry = mongoClient();
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     auto tmp = collectionCodeSegment.find_one(streamDocument{} << CodeSegment::KEY_TITLE << title
                                                                << finalize);
-    boost::optional<CodeSegment> res;
+    std::optional<CodeSegment> res;
     if (tmp)
         res = toCodeSegment(tmp.value());
     return res;
@@ -205,11 +205,11 @@ bool updateCodeSegment(const CodeSegment &segment) {
 //     return updateRes.has_value() && updateRes.value().modified_count() == 1;
 // }
 
-boost::optional<string> addTag(const Tag &tag) {
+std::optional<string> addTag(const Tag &tag) {
     auto clientEntry = mongoClient();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
     auto insertRes = collectionTag.insert_one(toBsonDoc(tag));
-    boost::optional<string> res;
+    std::optional<string> res;
     if (insertRes) {
         res = insertRes.value().inserted_id().get_oid().value.to_string();
     }
@@ -227,8 +227,8 @@ vector<Tag> getTags() {
     return res;
 }
 
-boost::optional<string> addUser(const User &user) {
-    boost::optional<string> res;
+std::optional<string> addUser(const User &user) {
+    std::optional<string> res;
     auto clientEntry = mongoClient();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto insertRes = collectionUser.insert_one(toBsonDoc(user));

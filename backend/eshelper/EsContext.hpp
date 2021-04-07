@@ -9,7 +9,6 @@ struct EsContext {
     static const char HOST[];
     static const int port;
     static const char INDEX_CODE_SEGMENT[];
-    static const char CONTENT_TYPE_JSON[];
 
     static const string& INDEX_MAPPING_CODE_SEGMENT();
 

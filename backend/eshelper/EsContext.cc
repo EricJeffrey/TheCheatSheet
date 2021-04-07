@@ -7,7 +7,6 @@
 const char EsContext::HOST[] = "172.17.0.5";
 const int EsContext::port = 9200;
 const char EsContext::INDEX_CODE_SEGMENT[] = "codesegment";
-const char EsContext::CONTENT_TYPE_JSON[] = "application/json";
 
 #endif // ES_CONTEXT_CC
 

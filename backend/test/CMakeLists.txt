@@ -3,6 +3,7 @@ enable_testing()
 
 aux_source_directory(../mongohelper/ TEST_MONGO_DIR)
 aux_source_directory(../eshelper/ TEST_ES_DIR)
+aux_source_directory(../util/ TEST_ES_DIR)
 
 add_executable(MongoTest MongoTest.cc ${TEST_MONGO_DIR})
 target_link_libraries(MongoTest ${CONAN_LIBS})

@@ -87,6 +87,7 @@
         "variant": "cpp",
         "version": "cpp",
         "forward_list": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "unordered_set": "cpp"
     }
 }

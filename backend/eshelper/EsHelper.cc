@@ -1,6 +1,7 @@
 #if !defined(ES_HELPER_CC)
 #define ES_HELPER_CC
 
+#include "../util/Utility.hpp"
 #include "EsHelper.hpp"
 #include "../lib/httplib.h"
 #include "EsContext.hpp"
@@ -37,11 +38,11 @@ CodeSegment toCodeSegment(const NlohmannJson &segmentJson) {
     return res;
 }
 
-boost::optional<string> addCodeSegment(const CodeSegment &segment) {
+std::optional<string> addCodeSegment(const CodeSegment &segment) {
     httplib::Client client{EsContext::HOST, EsContext::port};
     auto resp = client.Post((slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc").c_str(),
-                            toJson(segment).dump(), EsContext::CONTENT_TYPE_JSON);
-    boost::optional<string> res;
+                            toJson(segment).dump(), CONTENT_TYPE_JSON().c_str());
+    std::optional<string> res;
     if (resp.error() == HttpError::Success) {
         auto respJson = NlohmannJson::parse(resp.value().body);
         if (!respJson.contains("error") && respJson.contains("result"))
@@ -57,7 +58,7 @@ bool updateCodeSegment(const CodeSegment &segment) {
         auto resp = client.Put(
             (slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc" + slash + segment.mEsId)
                 .c_str(),
-            toJson(segment).dump(), EsContext::CONTENT_TYPE_JSON);
+            toJson(segment).dump(), CONTENT_TYPE_JSON().c_str());
         if (resp.error() == HttpError::Success) {
             auto respJson = NlohmannJson::parse(resp.value().body);
             if (!respJson.contains("error") && respJson.contains("result"))
@@ -74,7 +75,7 @@ vector<CodeSegment> search(const string &text, int32_t page, int32_t pagesSize) 
     httplib::Request request;
     request.path = slash + EsContext::INDEX_CODE_SEGMENT + slash + "_search";
     request.method = "GET";
-    request.headers = {{"Content-Type", EsContext::CONTENT_TYPE_JSON}};
+    request.headers = {{"Content-Type", CONTENT_TYPE_JSON().c_str()}};
     request.body =
         NlohmannJson{
             {"from", std::to_string((page - 1) * pagesSize)},
@@ -107,7 +108,7 @@ bool createIndex() {
     httplib::Client client{EsContext::HOST, EsContext::port};
     auto resp =
         client.Put((slash + EsContext::INDEX_CODE_SEGMENT).c_str(),
-                   EsContext::INDEX_MAPPING_CODE_SEGMENT().c_str(), EsContext::CONTENT_TYPE_JSON);
+                   EsContext::INDEX_MAPPING_CODE_SEGMENT().c_str(), CONTENT_TYPE_JSON().c_str());
     bool res = false;
     if (resp.error() == HttpError::Success) {
         auto respJson = NlohmannJson::parse(resp.value().body);

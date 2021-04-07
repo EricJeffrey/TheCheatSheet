@@ -62,7 +62,7 @@ NoSQL数据库实体
         赞某个代码段                                        - POST:favor{userId: xxx, codeSegmentId=xxx}
         获取第n页的搜索结果及总数                           - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
-        更新某个代码段                                      - POST:updateCodeSegment:{codeSegmentId:xxx, {updatedData...}}
+        更新某个代码段                                      - POST:updateCodeSegment:{updated-codeSegment-with-id-not-modified}
         新增代码段                                          - POST:addCodeSegment:{codeSegment}
         新增tag                                             - POST:addTag:{tag}
         删除tag                                             - POST:deleteTag:{tag}
