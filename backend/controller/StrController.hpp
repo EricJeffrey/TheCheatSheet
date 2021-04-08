@@ -9,6 +9,8 @@
 #include <typeinfo>
 #include <vector>
 
+#include <boost/lexical_cast.hpp>
+
 #include "../util/Utility.hpp"
 #include "BasicController.hpp"
 
@@ -39,17 +41,22 @@ template <typename... Args> struct StrController : public BasicController {
         using std::optional;
 
         visit_at(mParamValues, which, [&val](auto &v) {
-            fprintf(stderr, "DEBUG: val: %s, type(v): %s, is_same_v: %d\n", val.c_str(),
-                    typeid(v).name(), std::is_same_v<decltype(v), optional<int32_t> &>);
-            if constexpr (std::is_same_v<decltype(v), optional<int32_t> &>) {
-                v = static_cast<int32_t>(std::stol(val));
-            } else if constexpr (std::is_same_v<decltype(v), optional<int64_t> &>) {
-                v = std::stol(val);
-            } else if constexpr (std::is_same_v<decltype(v), optional<string> &>) {
-                v = val;
-            } else {
-                // should throw exception? "unsupported type"
-                static_assert(true, "unsupported type");
+            // fprintf(stderr, "DEBUG: val: %s, type(v): %s, is_same_v: %d\n", val.c_str(),
+            //         typeid(v).name(), std::is_same_v<decltype(v), optional<int32_t> &>);
+            try {
+                if constexpr (std::is_same_v<decltype(v), optional<int32_t> &>) {
+                    v = boost::lexical_cast<int>(val);
+                } else if constexpr (std::is_same_v<decltype(v), optional<int64_t> &>) {
+                    v = std::stol(val);
+                    v = boost::lexical_cast<long>(val);
+                } else if constexpr (std::is_same_v<decltype(v), optional<string> &>) {
+                    v = val;
+                } else {
+                    // should throw exception? "unsupported type"
+                    static_assert(true, "unsupported type");
+                }
+            } catch (std::bad_cast &e) {
+                throw HttpException(HttpException::CODE_BAD_REQUEST);
             }
         });
     }

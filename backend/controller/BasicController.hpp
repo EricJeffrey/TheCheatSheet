@@ -1,6 +1,8 @@
 #if !defined(BASIC_CONTROLLER_HPP)
 #define BASIC_CONTROLLER_HPP
 
+#include <exception>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -8,6 +10,17 @@ using std::string;
 using std::vector;
 
 namespace controller {
+
+struct HttpException : public std::runtime_error {
+    static const int32_t CODE_SUCCESS = 200;
+    static const int32_t CODE_BAD_REQUEST = 400;
+    static const int32_t CODE_INTERNAL_ERROR = 500;
+
+    int32_t mCode;
+    HttpException(int32_t code = CODE_SUCCESS) : std::runtime_error("no message"), mCode(code) {}
+    HttpException(int32_t code, const string &msg) : std::runtime_error(msg), mCode(code) {}
+    ~HttpException() = default;
+};
 
 /* Basic type for accessing controller */
 struct BasicController {

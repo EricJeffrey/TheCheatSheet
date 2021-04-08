@@ -1,6 +1,11 @@
 
-#include "controller/Handler.hpp"
-#include "lib/httplib.h"
+#include <exception>
+#include <memory>
+#include <optional>
+#include <tuple>
+
+#include "server.hpp"
+
 // #include "eshelper/EsHelper.hpp"
 // #include "mongohelper/MongoHelper.hpp"
 
@@ -37,19 +42,11 @@
 //     }
 // }
 
-void serverTest() {
-    httplib::Server server;
-
-    // server.Get("/*", controller::handleRequest);
-    // server.Get("/", [&](const httplib::Request &request, httplib::Response &response) {
-    //     response.set_content("hello world", "text/plain");
-    // });
-    server.Get(controller::RequestHandler::PATH_GET_CODE_SEGMENTS().c_str(),
-               controller::handleRequest);
-    server.listen("0.0.0.0", 8000);
-}
-
 int main(int argc, char const *argv[]) {
-    serverTest();
+    try {
+        startServer();
+    } catch (const std::exception &e) {
+        fprintf(stderr, "ERROR! Server Start Failed: %s\n", e.what());
+    }
     return 0;
 }

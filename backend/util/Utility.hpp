@@ -8,6 +8,7 @@
 
 using std::string;
 
+// todo move to another better place
 enum SortOrder { favorNumber, lastModified };
 
 const string &CONTENT_TYPE_JSON();
