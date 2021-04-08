@@ -17,11 +17,6 @@ using NlohmannJson = nlohmann::json;
 
 enum RequestMethod { M_GET, M_POST, M_PUT, M_DELETE };
 
-// segment.id and segment.esId is ignored
-NlohmannJson toJson(const CodeSegment &segment);
-// segment.id and segment.esId is ignored
-CodeSegment toCodeSegment(const NlohmannJson &segmentJson);
-
 // return optional<esId>
 std::optional<string> addCodeSegment(const CodeSegment &segment);
 

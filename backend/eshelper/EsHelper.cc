@@ -1,6 +1,7 @@
 #if !defined(ES_HELPER_CC)
 #define ES_HELPER_CC
 
+#include "../entity/EntityHelper.hpp"
 #include "../util/Utility.hpp"
 #include "EsHelper.hpp"
 #include "../lib/httplib.h"
@@ -15,28 +16,6 @@ using HttpHeaders = httplib::Headers;
 const static string slash = "/";
 
 namespace eshelper {
-
-NlohmannJson toJson(const CodeSegment &segment) {
-    return NlohmannJson{{CodeSegment::KEY_TITLE, segment.mTitle},
-                        {CodeSegment::KEY_DESCRIPTION, segment.mDescription},
-                        {CodeSegment::KEY_CONTENT, segment.mContent},
-                        {CodeSegment::KEY_CREATED_AT, segment.mCreatedAt},
-                        {CodeSegment::KEY_LAST_MODIFIED, segment.mLastModified},
-                        {CodeSegment::KEY_FAVOR_NUMBER, segment.mFavorNumber},
-                        {CodeSegment::KEY_TAG_LIST, NlohmannJson(segment.mTagList)}};
-}
-
-CodeSegment toCodeSegment(const NlohmannJson &segmentJson) {
-    CodeSegment res;
-    res.setTitle(segmentJson[CodeSegment::KEY_TITLE].get<string>());
-    res.setDescription(segmentJson[CodeSegment::KEY_DESCRIPTION].get<string>());
-    res.setContent(segmentJson[CodeSegment::KEY_CONTENT].get<string>());
-    res.setCreatedAt(segmentJson[CodeSegment::KEY_CREATED_AT].get<int64_t>());
-    res.setLastModified(segmentJson[CodeSegment::KEY_LAST_MODIFIED].get<int64_t>());
-    res.setFavorNumber(segmentJson[CodeSegment::KEY_FAVOR_NUMBER].get<int32_t>());
-    res.setTagList(segmentJson[CodeSegment::KEY_TAG_LIST].get<vector<string>>());
-    return res;
-}
 
 std::optional<string> addCodeSegment(const CodeSegment &segment) {
     httplib::Client client{EsContext::HOST, EsContext::port};

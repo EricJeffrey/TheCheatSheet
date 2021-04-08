@@ -88,6 +88,8 @@ string getCodeSegments(std::optional<int32_t> page, std::optional<int32_t> pageS
 //     }
 // }
 
+string addCodeSegment(const CodeSegment &segment) { return segment.toString(); }
+
 } // namespace controller
 
 #endif // SEGMENT_CONTROLLER

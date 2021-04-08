@@ -29,4 +29,9 @@ const string &RequestHelper::PATH_GET_CODE_SEGMENTS() {
     return _PATH_GET_CODE_SEGMENTS;
 }
 
+const string &RequestHelper::PATH_ADD_CODE_SEGMENT() {
+    const static string _PATH_ADD_CODE_SEGMENT = "/addcodesegment";
+    return _PATH_ADD_CODE_SEGMENT;
+}
+
 #endif // KEY_HELPER_CC

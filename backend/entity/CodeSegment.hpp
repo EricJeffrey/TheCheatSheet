@@ -45,7 +45,7 @@ public:
                mContent == segment.mContent && mTagList == segment.mTagList;
     }
 
-    string toString() {
+    string toString() const {
         constexpr char sep[] = ", ";
         return mTitle + sep + mDescription + sep + mContent + sep + std::to_string(mCreatedAt) +
                sep + std::to_string(mLastModified);

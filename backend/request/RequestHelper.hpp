@@ -13,5 +13,6 @@ struct RequestHelper {
     static const string &PARAM_KEY_CODE_SEGMENT();
 
     static const string &PATH_GET_CODE_SEGMENTS();
+    static const string &PATH_ADD_CODE_SEGMENT();
 };
 #endif // KEY_HELPER_HPP

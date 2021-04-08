@@ -32,9 +32,15 @@ struct BasicController {
         : mPath(path), mParamNames(paramNames) {}
     ~BasicController() = default;
 
-    // set value of the parameter, support [ int32_t, int64_t, string ]
-    virtual void set(int32_t which, const string &val) = 0;
-    virtual string operator()() = 0;
+    /* set value of the request parameter, support [ int32_t, int64_t, string ].
+    works for ParamController only. */
+    virtual void setParam(int32_t which, const string &val) {}
+
+    // set value of the request body
+    virtual void setBody(const string &val) {}
+
+    // invoke the handler and return the result
+    virtual string invoke() = 0;
 };
 } // namespace controller
 

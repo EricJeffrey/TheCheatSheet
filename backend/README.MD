@@ -7,6 +7,7 @@
   - [mongocxx](https://docs.mongodb.com/drivers/cxx/), MongoDB C++ Driver.
   - [gtest](https://github.com/google/googletest), testing library.
   - [nlohmann:json](https://github.com/nlohmann/json), json library.
+  - [boost](https://boost.org/), boost library.
 
 # build
 
