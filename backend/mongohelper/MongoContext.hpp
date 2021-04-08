@@ -21,7 +21,7 @@ struct MongoContext {
     static string COLLECTION_TAG;
 };
 
-mongocxx::pool::entry mongoClient();
+mongocxx::pool::entry mongoClientEntry();
 
 // Get collection, the lifetime of collection should be within the lifetime of client.
 mongocxx::collection mongoCollection(const mongocxx::pool::entry &clientEntry,

@@ -16,4 +16,4 @@ target_link_libraries(EsTest httplib)
 
 include(GoogleTest)
 gtest_discover_tests(MongoTest)
-gtest_discover_tests(EsTest)
+# gtest_discover_tests(EsTest)

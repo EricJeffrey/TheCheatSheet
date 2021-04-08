@@ -11,7 +11,7 @@ string MongoContext::COLLECTION_CODE_SEGMENT = "codesegment";
 string MongoContext::COLLECTION_USER = "user";
 string MongoContext::COLLECTION_TAG = "tag";
 
-mongocxx::pool::entry mongoClient() {
+mongocxx::pool::entry mongoClientEntry() {
     static mongocxx::pool connectionPool(MongoContext::Uri);
     return connectionPool.acquire();
 }

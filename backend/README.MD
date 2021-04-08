@@ -26,3 +26,4 @@
 - [is stdstoi actually safe to use](https://stackoverflow.com/questions/11598990/is-stdstoi-actually-safe-to-use)
 - [http get with request bod](https://stackoverflow.com/questions/978061/http-get-with-request-body)
 - [c11 way to index tuple at runtime without using switch](https://stackoverflow.com/questions/28997271/c11-way-to-index-tuple-at-runtime-without-using-switch)
+- [error code of the mongodb driver](https://github.com/mongodb/mongo-c-driver/blob/master/src/libmongoc/src/mongoc/mongoc-error.h)

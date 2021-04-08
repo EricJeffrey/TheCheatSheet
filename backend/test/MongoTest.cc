@@ -2,7 +2,7 @@
 
 #include "../mongohelper/MongoHelper.hpp"
 #include <bsoncxx/exception/exception.hpp>
-#include <mongocxx/exception/exception.hpp>
+#include <bsoncxx/json.hpp>
 
 TEST(MongoTest, CRUDTest) {
     /*
@@ -26,7 +26,7 @@ TEST(MongoTest, CRUDTest) {
             EXPECT_TRUE(addRes.has_value());
             testUserIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addUser(testUsers[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addUser(testUsers[0]).has_value());
     }
 
     /* addTag */
@@ -41,7 +41,7 @@ TEST(MongoTest, CRUDTest) {
             EXPECT_TRUE(addRes.has_value());
             testTagIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addTag(testTags[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addTag(testTags[0]).has_value());
     }
 
     /* addCodeSegment */
@@ -97,7 +97,7 @@ TEST(MongoTest, CRUDTest) {
             EXPECT_TRUE(addRes.has_value());
             testCodeSegmentIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addCodeSegment(testCodeSegments[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addCodeSegment(testCodeSegments[0]).has_value());
     }
 
     /* getTags */
@@ -204,8 +204,6 @@ TEST(MongoTest, CRUDTest) {
         auto userFavors = getUserFavors(testUserIds[0], 1, 3);
         EXPECT_EQ(userFavors.size(), 1u);
         EXPECT_EQ(userFavors[0], testCodeSegments[1]);
-        fprintf(stderr, "lhs: %s ------ rhs: %s\n", userFavors[0].toString().c_str(),
-                testCodeSegments[1].toString().c_str());
         EXPECT_EQ(getUserFavors(testUserIds[3], 2, 3).size(), 0u);
         EXPECT_THROW(getUserFavors("ThisWillNotBeAnIDToo", 1, 3).size(), bsoncxx::exception);
 

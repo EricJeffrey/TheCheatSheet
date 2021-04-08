@@ -50,11 +50,11 @@ NoSQL数据库实体
 
 接口描述 - 与功能相对的前后端交互接口
     用户
-        登录                                                - POST:login:{[name: xxx|email: xxx], password: xxx}
+        登录                                                - POST:login:{email: xxx, password: xxx}
         注册                                                - POST:register:{email: xxx, name: xxx, password: xxx}
         更新密码                                            - POST:updatePassword:{email: xxx, oldPassword: xxx, newPassword: xxx}
         获取用户赞过的代码段第n页及总数                     - GET:userFavors?page=n&pageSize=n
-        获取用户赞过的所有代码段ID                          - Get:userFavorsId?
+        获取用户赞过的所有代码段ID                          - Get:userFavorIds?
     浏览
         按[时间顺序|点赞数顺序]
             获取[某个标签]的第n页代码段及总数               - GET:codeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
@@ -183,7 +183,7 @@ NoSQL数据库实体
     代码段被查看数
     创建时间/最后修改时间
     分享功能
-    外部登录接口-微信/QQ...
+    外部登录接口-手机号/微信/QQ...
     分类与标签
     标签使用词云
     用户头像

@@ -3,7 +3,10 @@
 #define MONGO_HELPER_CC
 
 #include "MongoHelper.hpp"
+
 #include <bsoncxx/json.hpp>
+#include <mongoc/mongoc.h>
+#include <mongocxx/exception/operation_exception.hpp>
 
 using basicDocument = bsoncxx::builder::basic::document;
 using basicSubArray = bsoncxx::builder::basic::sub_array;
@@ -98,13 +101,18 @@ Tag toTag(const bsoncxx::document::view &doc) {
 }
 
 std::optional<string> addCodeSegment(const CodeSegment &segment) {
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-    auto insertRes = collectionCodeSegment.insert_one(toBsonDoc(segment));
     std::optional<string> res;
-    if (insertRes.has_value()) {
-        res = insertRes.value().inserted_id().get_oid().value.to_string();
+    try {
+        auto insertRes = collectionCodeSegment.insert_one(toBsonDoc(segment));
+        if (insertRes.has_value()) {
+            res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
+        }
+    } catch (const mongocxx::operation_exception &e) {
+        if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
+            throw;
     }
     return res;
 }
@@ -125,7 +133,7 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
         options.sort(streamDocument{} << CodeSegment::KEY_FAVOR_NUMBER << -1 << finalize);
         break;
     }
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     // search all
@@ -148,14 +156,14 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
 }
 
 std::optional<CodeSegment> findCodeSegmentByTitle(const string &title) {
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     auto tmp = collectionCodeSegment.find_one(streamDocument{} << CodeSegment::KEY_TITLE << title
                                                                << finalize);
     std::optional<CodeSegment> res;
     if (tmp)
-        res = toCodeSegment(tmp.value());
+        res.emplace(toCodeSegment(tmp.value()));
     return res;
 }
 
@@ -163,7 +171,7 @@ int32_t countCodeSegment(const string &tagId) {
     static const string fieldName = "count";
     int32_t res = 0;
     // find tagId first
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
     // count code segment with tag
     auto collectionCodeSegment =
@@ -182,7 +190,7 @@ int32_t countCodeSegment(const string &tagId) {
 bool updateCodeSegment(const CodeSegment &segment) {
     bool res = false;
     if (!segment.mId.empty()) {
-        auto clientEntry = mongoClient();
+        auto clientEntry = mongoClientEntry();
         auto collectionCodeSegment =
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
 
@@ -195,7 +203,7 @@ bool updateCodeSegment(const CodeSegment &segment) {
 }
 
 // bool removeTagOfCodeSegment(const string &segmentId, const string &tagId) {
-//     auto clientEntry = mongoClient();
+//     auto clientEntry = mongoClientEntry();
 //     auto collectionCodeSegment =
 //         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
 //     auto updateRes = collectionCodeSegment.update_one(
@@ -206,19 +214,24 @@ bool updateCodeSegment(const CodeSegment &segment) {
 // }
 
 std::optional<string> addTag(const Tag &tag) {
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
-    auto insertRes = collectionTag.insert_one(toBsonDoc(tag));
     std::optional<string> res;
-    if (insertRes) {
-        res = insertRes.value().inserted_id().get_oid().value.to_string();
+    try {
+        auto insertRes = collectionTag.insert_one(toBsonDoc(tag));
+        if (insertRes) {
+            res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
+        }
+    } catch (const mongocxx::operation_exception &e) {
+        if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
+            throw;
     }
     return res;
 }
 
 vector<Tag> getTags() {
     vector<Tag> res;
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
     auto cursor = collectionTag.find({});
     for (auto &&doc : cursor) {
@@ -229,17 +242,36 @@ vector<Tag> getTags() {
 
 std::optional<string> addUser(const User &user) {
     std::optional<string> res;
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
-    auto insertRes = collectionUser.insert_one(toBsonDoc(user));
-    if (insertRes.has_value())
-        res = insertRes.value().inserted_id().get_oid().value.to_string();
+    try {
+        auto insertRes = collectionUser.insert_one(toBsonDoc(user));
+        if (insertRes.has_value())
+            res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
+    } catch (const mongocxx::operation_exception &e) {
+        if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
+            throw;
+    }
+    return res;
+}
+
+std::optional<User> getUser(const string &email) {
+    std::optional<User> res;
+    if (!email.empty()) {
+        auto clientEntry = mongoClientEntry();
+        auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
+        auto findRes =
+            collectionUser.find_one(streamDocument{} << User::KEY_EMAIL << email << finalize);
+        if (findRes.has_value()) {
+            res.emplace(toUser(findRes.value().view()));
+        }
+    }
     return res;
 }
 
 bool favor(const string &userId, const string &codeSegmentId) {
     bool res = false;
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto updateUserRes = collectionUser.update_one(
         streamDocument{} << User::KEY_ID << oid(userId) << finalize,
@@ -273,7 +305,7 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
         auto filter = basicDocument{};
         filter.append(kvp(CodeSegment::KEY_ID, tmpDoc));
 
-        auto clientEntry = mongoClient();
+        auto clientEntry = mongoClientEntry();
         auto collectionCodeSegments =
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
         auto cursor = collectionCodeSegments.find(filter.extract());
@@ -287,7 +319,7 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
 
 vector<string> getUserFavorsIds(const string &userId) {
     vector<string> res;
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto findRes =
         collectionUser.find_one(streamDocument{} << User::KEY_ID << oid(userId) << finalize);
@@ -307,7 +339,7 @@ int32_t countUserFavors(const string &userId) {
 }
 
 bool mongoIndexInit() {
-    auto clientEntry = mongoClient();
+    auto clientEntry = mongoClientEntry();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
     auto collectionCodeSegment =

@@ -21,7 +21,8 @@ User toUser(const bsoncxx::document::view &doc);
 Tag toTag(const bsoncxx::document::view &doc);
 
 /* CodeSegments related */
-// todo unique-conflict exception should be catched, exception shall occur only when internal error
+
+// conflict of duplicate key on inserting will throw exception with code=MONGOC_ERROR_DUPLICATE_KEY
 
 // return optional<id>, elements of segment.tagList is not checked
 std::optional<string> addCodeSegment(const CodeSegment &segment);
@@ -51,6 +52,8 @@ vector<Tag> getTags();
 /* User related */
 
 std::optional<string> addUser(const User &user);
+
+std::optional<User> getUser(const string& userEmail);
 
 // favor a code segment, return false if user has favored before
 bool favor(const string &userId, const string &codeSegmentId);
