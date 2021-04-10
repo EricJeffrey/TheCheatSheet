@@ -3,7 +3,20 @@
 
 #include "RequestHelper.hpp"
 
-const string &RequestHelper::PARAM_KEY_SORTBY() {
+#include <unordered_map>
+
+std::optional<SortOrder> SortOrderKeyToOrder(const string &key) {
+    const static std::unordered_map<string, SortOrder> mapping = {
+        {"favorNumber", SortOrder::favorNumber},
+        {"lastModified", SortOrder::lastModified},
+    };
+    std::optional<SortOrder> res;
+    if (mapping.find(key) != mapping.end())
+        res = mapping.at(key);
+    return res;
+}
+
+const string &RequestHelper::PARAM_KEY_SORT_BY() {
     const static string _PARAM_KEY_SORTBY = "sortBy";
     return _PARAM_KEY_SORTBY;
 }
@@ -24,16 +37,46 @@ const string &RequestHelper::PARAM_KEY_CODE_SEGMENT() {
     return _PARAM_KEY_CODE_SEGMENT;
 }
 
+const string &RequestHelper::PARAM_KEY_TEXT() {
+    static const string _TEXT = "text";
+    return _TEXT;
+}
+const string &RequestHelper::PARAM_KEY_EMAIL() {
+    static const string _EMAIL = "email";
+    return _EMAIL;
+}
+const string &RequestHelper::PARAM_KEY_PASSWORD() {
+    static const string _PASSWORD = "password";
+    return _PASSWORD;
+}
+const string &RequestHelper::PARAM_KEY_NAME() {
+    static const string _NAME = "name";
+    return _NAME;
+}
+const string &RequestHelper::PARAM_KEY_OLD_PASSWORD() {
+    static const string _OLD_PASSWORD = "oldPassword";
+    return _OLD_PASSWORD;
+}
+const string &RequestHelper::PARAM_KEY_USER_ID() {
+    static const string _USER_ID = "userId";
+    return _USER_ID;
+}
+const string &RequestHelper::PARAM_KEY_CODE_SEGMENT_ID() {
+    static const string _CODE_SEGMENT_ID = "codeSegmentId";
+    return _CODE_SEGMENT_ID;
+}
+const string &RequestHelper::HEADER_COOKIE_KEY_EMAIL() {
+    const static string _HEADER_KEY_COOKIE = "cookie";
+    return _HEADER_KEY_COOKIE;
+}
 const string &RequestHelper::PATH_GET_CODE_SEGMENTS() {
     const static string _PATH_GET_CODE_SEGMENTS = "/getCodeSegments";
     return _PATH_GET_CODE_SEGMENTS;
 }
-
 const string &RequestHelper::PATH_ADD_CODE_SEGMENT() {
     const static string _PATH_ADD_CODE_SEGMENT = "/addCodeSegment";
     return _PATH_ADD_CODE_SEGMENT;
 }
-
 const string &RequestHelper::PATH_UPDATE_CODE_SEGMENT() {
     const static string _PATH_UPDATE_CODE_SEGMENT = "/updateCodeSegment";
     return _PATH_UPDATE_CODE_SEGMENT;

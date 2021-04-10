@@ -5,6 +5,11 @@
     "cmake.ctestArgs": [
         "-V"
     ],
+    "editor.tokenColorCustomizations": {
+        "[One Dark Pro]": {
+            "keywords": "#0eb7d4"
+        }
+    },
     "cmake.configureOnOpen": true,
     "files.associations": {
         "*.tcc": "cpp",
@@ -89,5 +94,6 @@
         "forward_list": "cpp",
         "valarray": "cpp",
         "unordered_set": "cpp"
-    }
+    },
+    "python.pythonPath": "/bin/python3"
 }

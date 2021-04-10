@@ -4,7 +4,7 @@
 #include <optional>
 #include <tuple>
 
-#include "server.hpp"
+#include "httpserver/server.hpp"
 
 // #include "eshelper/EsHelper.hpp"
 // #include "mongohelper/MongoHelper.hpp"
@@ -45,6 +45,7 @@
 int main(int argc, char const *argv[]) {
     try {
         startServer();
+        // testServer();
     } catch (const std::exception &e) {
         fprintf(stderr, "ERROR! Server Start Failed: %s\n", e.what());
     }

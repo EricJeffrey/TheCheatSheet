@@ -6,15 +6,18 @@
 #include <tuple>
 
 #include "../entity/CodeSegment.hpp"
+#include "../util/RequestHelper.hpp"
+#include "BasicController.hpp"
 
 using std::string;
 
 namespace controller {
+using std::optional;
 
-string getCodeSegments(std::optional<int32_t> page, std::optional<int32_t> pageSize,
-                       std::optional<string> sortOrder, std::optional<string> tag);
+HandlerResult getCodeSegments(const optional<int32_t> &page, const optional<int32_t> &pageSize,
+                       const optional<string> &sortOrder, const optional<string> &tag);
 
-string addCodeSegment(const CodeSegment &segment);
+HandlerResult addCodeSegment(const std::optional<CodeSegment> &, const RequestHelper::Headers &headers);
 
 } // namespace controller
 

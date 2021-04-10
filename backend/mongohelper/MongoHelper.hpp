@@ -4,7 +4,7 @@
 #include "../entity/CodeSegment.hpp"
 #include "../entity/Tag.hpp"
 #include "../entity/User.hpp"
-#include "../util/Utility.hpp"
+#include "../util/RequestHelper.hpp"
 #include "MongoContext.hpp"
 
 #include <bsoncxx/array/element.hpp>
@@ -51,6 +51,7 @@ vector<Tag> getTags();
 
 /* User related */
 
+// return optional<userId>
 std::optional<string> addUser(const User &user);
 
 std::optional<User> getUser(const string& userEmail);

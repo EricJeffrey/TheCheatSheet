@@ -24,7 +24,7 @@ NoSQL数据库实体
 功能列表
     自动登录
         登录成功设置cookie实现
-        登录成功跳转到首页
+        登录成功跳转到首页 - 前端重定向
     浏览查看 - 分页固定，每页的数目由客户端决定，响应数据包含总数目
         分页浏览所有代码
             按修改时间由近及远顺序
@@ -62,10 +62,34 @@ NoSQL数据库实体
         赞某个代码段                                        - POST:favor{userId: xxx, codeSegmentId=xxx}
         获取第n页的搜索结果及总数                           - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
-        更新某个代码段                                      - POST:updateCodeSegment:{updated-codeSegment-with-id-not-modified}
-        新增代码段                                          - POST:addCodeSegment:{codeSegment}
-        新增tag                                             - POST:addTag:{tag}
-        删除tag                                             - POST:deleteTag:{tag}
+        更新某个代码段                                      - POST:updateCodeSegment:{"codesegment": updated-codeSegment-with-id-not-modified}
+        新增代码段                                          - POST:addCodeSegment:{"codesegment": codeSegment}
+        新增tag                                             - POST:addTag:{"tag": tag}
+        删除tag                                             - POST:deleteTag:{"tag": tag}
+
+杂项
+    固定分页 - 获取数据时同时获取数目
+    使用skip+limit(offset+limit)方式进行分页 - 百万数据量可能会产生性能问题
+    每个代码段对应多个标签
+    默认时间顺序
+    登录/登出后跳转到首页
+    搜索结果不支持按标签分类
+    仅在详情页面显示点赞按钮
+
+
+可扩展
+    代码段被查看数
+    创建时间/最后修改时间
+    分享功能
+    外部登录接口-手机号/微信/QQ...
+    分类与标签
+    标签使用词云
+    用户头像
+    绑定的社交账号
+    用户点赞的代码段按标签
+
+系统结构
+    HTTP服务器 + MongoDB + Elasticsearch
 
 
 用例
@@ -168,27 +192,3 @@ NoSQL数据库实体
                 可能的结果
                     修改成功
                     修改失败
-
-杂项
-    固定分页 - 获取数据时同时获取数目
-    使用skip+limit(offset+limit)方式进行分页 - 百万数据量可能会产生性能问题
-    每个代码段对应多个标签
-    默认时间顺序
-    登录/登出后跳转到首页
-    搜索结果不支持按标签分类
-    仅在详情页面显示点赞按钮
-
-
-可扩展
-    代码段被查看数
-    创建时间/最后修改时间
-    分享功能
-    外部登录接口-手机号/微信/QQ...
-    分类与标签
-    标签使用词云
-    用户头像
-    绑定的社交账号
-    用户点赞的代码段按标签
-
-系统结构
-    HTTP服务器 + MongoDB + Elasticsearch

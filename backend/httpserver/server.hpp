@@ -3,4 +3,6 @@
 
 void startServer();
 
+void testServer();
+
 #endif // SERVER_HPP

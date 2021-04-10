@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "nlohmann/json.hpp"
+
 using std::string;
 using std::vector;
 
@@ -39,6 +41,34 @@ public:
           mLastModified(lastModified), mFavorNumber(favorNumber), mTagList(tagList) {}
     ~CodeSegment() {}
 
+    CodeSegment(const CodeSegment &segment) = default;
+    CodeSegment &operator=(const CodeSegment &segment) = default;
+
+    CodeSegment(CodeSegment &&segment) { swap(std::forward<CodeSegment>(segment)); }
+
+    CodeSegment &operator=(CodeSegment &&segment) {
+        swap(std::forward<CodeSegment>(segment));
+        return *this;
+    }
+
+    // construct from a json object
+    CodeSegment(const nlohmann::json &valJson);
+
+    // construct from a json-string
+    CodeSegment(const string &val);
+
+    void swap(CodeSegment &&segment) {
+        mId.swap(segment.mId);
+        mEsId.swap(segment.mEsId);
+        mTitle.swap(segment.mTitle);
+        mDescription.swap(segment.mDescription);
+        mContent.swap(segment.mContent);
+        mCreatedAt = segment.mCreatedAt;
+        mLastModified = segment.mLastModified;
+        mFavorNumber = segment.mFavorNumber;
+        mTagList.swap(segment.mTagList);
+    }
+
     // mTitle and mDescription and mContent and mTagList equal
     bool operator==(const CodeSegment &segment) const {
         return mTitle == segment.mTitle && mDescription == segment.mDescription &&
@@ -61,4 +91,5 @@ public:
     void setFavorNumber(const int32_t favorNumber) { mFavorNumber = favorNumber; }
     void setTagList(const vector<string> &tagList) { mTagList = tagList; }
 };
+
 #endif // CODE_SEGMENT_HPP
