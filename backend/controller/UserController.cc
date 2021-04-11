@@ -3,62 +3,139 @@
 
 #include "UserController.hpp"
 #include "../mongohelper/MongoHelper.hpp"
+#include "../util/CookieHelper.hpp"
 #include "../util/RequestHelper.hpp"
 #include "../util/ResponseHelper.hpp"
 #include "../util/Utility.hpp"
+#include "frame/HttpException.hpp"
+
+auto userFromMongoByIdFromCookie = [](const RequestHelper::Headers &headers) {
+    std::optional<User> res;
+    do {
+        auto it = headers.find(CookieHelper::KEY_COOKIE);
+        if (it != headers.end()) {
+            auto uid = CookieHelper::getCookieValue(CookieHelper::KEY_COOKIE_UID, it->second);
+            if (!uid.empty()) {
+                auto user = mongohelper::getUserById(uid);
+                if (user.has_value())
+                    res.emplace(user.value());
+            }
+        }
+    } while (false);
+    return res;
+};
 
 namespace controller {
 
 HandlerResult userLogin(const optional<string> &email, const optional<string> &password) {
-    int32_t httpErrorCode = HttpException::CODE_SUCCESS;
-    int32_t operationCode = ErrorController::CODE_SUCCESS;
-    string resOrErrMsg;
+    HttpException httpError;
+    HandlerResult operationResult;
+    vector<HandlerResult::RespHeaderItem> respHeaders;
+
     if (email.has_value() && password.has_value()) {
-        auto userOpt = mongohelper::getUser(email.value());
+        auto userOpt = mongohelper::getUserByEmail(email.value());
         if (userOpt.has_value()) {
             const auto &user = userOpt.value();
-            EncryptHelper helper;
-            if (helper.encrypt(password.value()) == user.mPassword) {
-                resOrErrMsg = ErrorController::MSG_SUCCESS;
-            } else {
-                operationCode = ErrorController::CODE_AUTHENTIC_FAILED;
-                resOrErrMsg = ErrorController::MSG_WRONG_PASSWORD;
-            }
-        } else {
-            operationCode = ErrorController::CODE_AUTHENTIC_FAILED;
-            resOrErrMsg = ErrorController::MSG_WRONG_USER;
-        }
-    } else {
-        httpErrorCode = HttpException::CODE_BAD_REQUEST;
-        resOrErrMsg = "email or password missing";
-    }
-    if (httpErrorCode != HttpException::CODE_SUCCESS)
-        throw HttpException{httpErrorCode, resOrErrMsg};
-    return HandlerResult{
-        operationCode, resOrErrMsg, {{ResponseHelper::HEADER_KEY_SET_COOKIE(), email.value()}}};
+            if (EncryptHelper{}.encrypt(password.value()) == user.mPassword) {
+                operationResult.set(
+                    HandlerResult::MSG_SUCCESS,
+                    {{CookieHelper::KEY_SET_COOKIE,
+                      CookieHelper::wrapCookie(CookieHelper::KEY_COOKIE_UID, user.mId)}});
+            } else
+                operationResult.set(HandlerResult::CODE_AUTHENTIC_FAILED,
+                                    HandlerResult::MSG_WRONG_PASSWORD);
+        } else
+            operationResult.set(HandlerResult::CODE_AUTHENTIC_FAILED,
+                                HandlerResult::MSG_WRONG_USER);
+    } else
+        httpError.set(HttpException::CODE_BAD_REQUEST, "email or password missing");
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
 }
 
 HandlerResult userRegister(const optional<string> &email, const optional<string> &name,
                            const optional<string> &password) {
-    int32_t operationCode = ErrorController::CODE_SUCCESS;
-    int32_t httpErrorCode = HttpException::CODE_SUCCESS;
-    string resOrErrMsg;
+    HandlerResult operationResult;
+    HttpException httpError;
     if (email.has_value() && name.has_value() && password.has_value()) {
         User user{name.value(), email.value(), password.value()};
         auto addRes = mongohelper::addUser(user);
         if (addRes.has_value()) {
-            resOrErrMsg = ErrorController::MSG_SUCCESS + (' ' + addRes.value());
+            operationResult.set(HandlerResult::MSG_SUCCESS + (' ' + addRes.value()));
         } else {
-            operationCode = ErrorController::CODE_CONFLICT;
-            resOrErrMsg = ErrorController::MSG_EMAIL_USED;
+            operationResult.set(HandlerResult::CODE_MONGODB_CONFLICT,
+                                HandlerResult::MSG_EMAIL_USED);
         }
     } else {
-        httpErrorCode = HttpException::CODE_BAD_REQUEST;
-        resOrErrMsg = "email, name and password required";
+        httpError.set(HttpException::CODE_BAD_REQUEST, "email, name and password required");
     }
-    if (httpErrorCode != HttpException::CODE_SUCCESS)
-        throw HttpException(httpErrorCode, resOrErrMsg);
-    return HandlerResult{operationCode, resOrErrMsg};
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
+}
+
+HandlerResult getUserFavoredSegmentIds(const RequestHelper::Headers &headers) {
+    HttpException httpError;
+    HandlerResult operationResult;
+
+    auto userOpt = userFromMongoByIdFromCookie(headers);
+    if (userOpt.has_value()) {
+        operationResult.set(
+            nlohmann::json{mongohelper::getUserFavorsIds(userOpt.value().mId)}.dump());
+    } else {
+        operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+    }
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
+}
+
+HandlerResult getUserFavoredSegments(const optional<int32_t> &page,
+                                     const optional<int32_t> pageSize,
+                                     const RequestHelper::Headers &headers) {
+    HttpException httpError;
+    HandlerResult operationResult;
+    if (page.has_value() && pageSize.has_value() && page.value() >= 1 && pageSize.value() >= 1) {
+        auto userOpt = userFromMongoByIdFromCookie(headers);
+        if (userOpt.has_value()) {
+            auto favors =
+                mongohelper::getUserFavors(userOpt.value().mId, page.value(), pageSize.value());
+            operationResult.set(nlohmann::json{
+                {ResponseHelper::KEY_TOTAL_COUNT, favors.size()},
+                {ResponseHelper::KEY_CODE_SEGMENTS, favors},
+            }
+                                    .dump());
+        } else {
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+        }
+    } else {
+        httpError.set(HttpException::CODE_BAD_REQUEST, "invalid request parameter");
+    }
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
+}
+
+HandlerResult favorCodeSegment(const optional<string> &segmentId, const Headers &headers) {
+    HttpException httpError;
+    HandlerResult operationResult;
+    if (segmentId.has_value() && !segmentId.value().empty()) {
+        auto userOpt = userFromMongoByIdFromCookie(headers);
+        if (userOpt.has_value()) {
+            if (!mongohelper::favor(userOpt.value().mId, segmentId.value())) {
+                operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
+                                    HandlerResult::MSG_UNKNOWN_MONGO_FAILURE);
+            }
+        } else {
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+        }
+    } else {
+        httpError.set(HttpException::CODE_BAD_REQUEST, "parameter codeSegmentId is required");
+    }
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
 }
 
 } // namespace controller

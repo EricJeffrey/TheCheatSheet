@@ -12,7 +12,7 @@ const string &CONTENT_TYPE_JSON();
 const string &CONTENT_TYPE_PLAIN();
 const string &CONTENT_HTML();
 
-// todo user better method
+// todo user better encrypt method
 struct EncryptHelper {
     const static int32_t k = 5;
     string encrypt(const string &text) {

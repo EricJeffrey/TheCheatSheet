@@ -9,6 +9,7 @@
 TEST(EsTest, SearchTest) {
     /*
     Execute before test start:
+        docker start sjf_test_es
         curl -X DELETE '172.17.0.5:9200/codesegment'
     */
     using namespace eshelper;

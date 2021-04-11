@@ -25,6 +25,7 @@ NoSQL数据库实体
     自动登录
         登录成功设置cookie实现
         登录成功跳转到首页 - 前端重定向
+        每次访问首页都重新Set-Cookie
     浏览查看 - 分页固定，每页的数目由客户端决定，响应数据包含总数目
         分页浏览所有代码
             按修改时间由近及远顺序
@@ -34,17 +35,18 @@ NoSQL数据库实体
             按点赞数排序分页浏览
         查看某个代码段
         复制代码段内容
-        点赞代码段
+        点赞代码段 - 通过cookie获取用户标识
     搜索代码段
     编辑操作 - lastModified、createdAt字段由客户端设置
         新增代码段 - 代码段标题不可重复，先后添加到es和mongo，并设置esId
-            新增tag - 客户端主动发起新增操作
+            新增tag - 客户端发起
         修改某个代码段
+            新增代码段的tag - 客户端发起新增操作
+            删除代码段的tag - 与更新代码段时一同进行
     用户操作
         注册 - 完成后自动登入
         登入 - 设置cookie
         登出 - 清除cookie
-        修改密码 - 重设cookie
         查看赞过的代码段
 
 
@@ -52,20 +54,18 @@ NoSQL数据库实体
     用户
         登录                                                - POST:login:{email: xxx, password: xxx}
         注册                                                - POST:register:{email: xxx, name: xxx, password: xxx}
-        更新密码                                            - POST:updatePassword:{email: xxx, oldPassword: xxx, newPassword: xxx}
         获取用户赞过的代码段第n页及总数                     - GET:userFavors?page=n&pageSize=n
         获取用户赞过的所有代码段ID                          - Get:userFavorIds?
     浏览
         按[时间顺序|点赞数顺序]
             获取[某个标签]的第n页代码段及总数               - GET:codeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
         获取所有标签                                        - GET:tagList
-        赞某个代码段                                        - POST:favor{userId: xxx, codeSegmentId=xxx}
+        赞某个代码段                                        - POST:favor{codeSegmentId=xxx}
         获取第n页的搜索结果及总数                           - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
         更新某个代码段                                      - POST:updateCodeSegment:{"codesegment": updated-codeSegment-with-id-not-modified}
         新增代码段                                          - POST:addCodeSegment:{"codesegment": codeSegment}
         新增tag                                             - POST:addTag:{"tag": tag}
-        删除tag                                             - POST:deleteTag:{"tag": tag}
 
 杂项
     固定分页 - 获取数据时同时获取数目
@@ -185,10 +185,3 @@ NoSQL数据库实体
         可以进入个人中心 - 点击个人按钮
             可以查看自己赞过的代码段 - 点击相关按钮
                 可以按照标签筛选 - 点击相关标签按钮
-            可以修改密码
-                需要输入
-                    原密码
-                    新密码 - 重复验证
-                可能的结果
-                    修改成功
-                    修改失败

@@ -1,10 +1,9 @@
 #if !defined(ES_HELPER_CC)
 #define ES_HELPER_CC
 
-#include "../entity/EntityHelper.hpp"
-#include "../util/Utility.hpp"
 #include "EsHelper.hpp"
 #include "../lib/httplib.h"
+#include "../util/Utility.hpp"
 #include "EsContext.hpp"
 #include "nlohmann/json.hpp"
 
@@ -19,13 +18,15 @@ namespace eshelper {
 
 std::optional<string> addCodeSegment(const CodeSegment &segment) {
     httplib::Client client{EsContext::HOST, EsContext::port};
+    auto segmentJson = segment.toJson(true, true);
+    segmentJson[CodeSegment::KEY_MONGO_ID] = segment.mId;
     auto resp = client.Post((slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc").c_str(),
-                            toJson(segment).dump(), CONTENT_TYPE_JSON().c_str());
+                            segmentJson.dump(), CONTENT_TYPE_JSON().c_str());
     std::optional<string> res;
     if (resp.error() == HttpError::Success) {
         auto respJson = NlohmannJson::parse(resp.value().body);
         if (!respJson.contains("error") && respJson.contains("result"))
-            res = respJson["_id"];
+            res.emplace(respJson["_id"].dump());
     }
     return res;
 }
@@ -34,10 +35,12 @@ bool updateCodeSegment(const CodeSegment &segment) {
     bool res = false;
     if (!segment.mEsId.empty()) {
         httplib::Client client{EsContext::HOST, EsContext::port};
+        auto segmentJson = segment.toJson(true, false);
+        segmentJson[CodeSegment::KEY_MONGO_ID] = segment.mId;
         auto resp = client.Put(
             (slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc" + slash + segment.mEsId)
                 .c_str(),
-            toJson(segment).dump(), CONTENT_TYPE_JSON().c_str());
+            segmentJson.dump(), CONTENT_TYPE_JSON().c_str());
         if (resp.error() == HttpError::Success) {
             auto respJson = NlohmannJson::parse(resp.value().body);
             if (!respJson.contains("error") && respJson.contains("result"))
@@ -76,7 +79,10 @@ vector<CodeSegment> search(const string &text, int32_t page, int32_t pagesSize) 
                 res.reserve(num);
             auto hitsJson = respJson["hits"]["hits"];
             for (auto &&v : hitsJson) {
-                res.emplace_back(toCodeSegment(v["_source"]));
+                auto &source = v["_source"];
+                auto segment = CodeSegment(source, true, true);
+                segment.setId(source[CodeSegment::KEY_MONGO_ID].get<string>());
+                res.emplace_back(std::move(segment));
             }
         }
     }

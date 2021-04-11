@@ -65,10 +65,6 @@ const string &RequestHelper::PARAM_KEY_CODE_SEGMENT_ID() {
     static const string _CODE_SEGMENT_ID = "codeSegmentId";
     return _CODE_SEGMENT_ID;
 }
-const string &RequestHelper::HEADER_COOKIE_KEY_EMAIL() {
-    const static string _HEADER_KEY_COOKIE = "cookie";
-    return _HEADER_KEY_COOKIE;
-}
 const string &RequestHelper::PATH_GET_CODE_SEGMENTS() {
     const static string _PATH_GET_CODE_SEGMENTS = "/getCodeSegments";
     return _PATH_GET_CODE_SEGMENTS;

@@ -12,6 +12,7 @@ using std::vector;
 class CodeSegment {
 public:
     static constexpr char KEY_ID[] = "_id";
+    static constexpr char KEY_MONGO_ID[] = "mongoId";
     static constexpr char KEY_ES_ID[] = "esId";
     static constexpr char KEY_TITLE[] = "title";
     static constexpr char KEY_DESCRIPTION[] = "description";
@@ -39,10 +40,14 @@ public:
                 const vector<string> &tagList)
         : mTitle(title), mDescription(description), mContent(content), mCreatedAt(createdAt),
           mLastModified(lastModified), mFavorNumber(favorNumber), mTagList(tagList) {}
+
     ~CodeSegment() {}
 
     CodeSegment(const CodeSegment &segment) = default;
+
     CodeSegment &operator=(const CodeSegment &segment) = default;
+
+    void swap(CodeSegment &&segment);
 
     CodeSegment(CodeSegment &&segment) { swap(std::forward<CodeSegment>(segment)); }
 
@@ -52,22 +57,10 @@ public:
     }
 
     // construct from a json object
-    CodeSegment(const nlohmann::json &valJson);
+    CodeSegment(const nlohmann::json &valJson, bool ignoreMId, bool ignoreEsId);
 
-    // construct from a json-string
-    CodeSegment(const string &val);
-
-    void swap(CodeSegment &&segment) {
-        mId.swap(segment.mId);
-        mEsId.swap(segment.mEsId);
-        mTitle.swap(segment.mTitle);
-        mDescription.swap(segment.mDescription);
-        mContent.swap(segment.mContent);
-        mCreatedAt = segment.mCreatedAt;
-        mLastModified = segment.mLastModified;
-        mFavorNumber = segment.mFavorNumber;
-        mTagList.swap(segment.mTagList);
-    }
+    // convert to nlohmann::json. use toJson if id fields are not needed
+    operator nlohmann::json() const { return toJson(false, false); }
 
     // mTitle and mDescription and mContent and mTagList equal
     bool operator==(const CodeSegment &segment) const {
@@ -75,11 +68,9 @@ public:
                mContent == segment.mContent && mTagList == segment.mTagList;
     }
 
-    string toString() const {
-        constexpr char sep[] = ", ";
-        return mTitle + sep + mDescription + sep + mContent + sep + std::to_string(mCreatedAt) +
-               sep + std::to_string(mLastModified);
-    }
+    string toString() const { return toJson(false, false).dump(); }
+
+    nlohmann::json toJson(bool ignoreMId, bool ignoreEsId) const;
 
     void setId(const string &id) { mId = id; }
     void setEsId(const string &esId) { mEsId = esId; }

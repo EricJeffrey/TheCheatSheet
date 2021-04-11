@@ -255,7 +255,7 @@ std::optional<string> addUser(const User &user) {
     return res;
 }
 
-std::optional<User> getUser(const string &email) {
+std::optional<User> getUserByEmail(const string &email) {
     std::optional<User> res;
     if (!email.empty()) {
         auto clientEntry = mongoClientEntry();
@@ -265,6 +265,19 @@ std::optional<User> getUser(const string &email) {
         if (findRes.has_value()) {
             res.emplace(toUser(findRes.value().view()));
         }
+    }
+    return res;
+}
+
+std::optional<User> getUserById(const string &userId) {
+    std::optional<User> res;
+    if (!userId.empty()) {
+        auto clientEntry = mongoClientEntry();
+        auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
+        auto findRes = collectionUser.find_one(streamDocument{}
+                                               << User::KEY_ID << bsoncxx::oid(userId) << finalize);
+        if (findRes.has_value())
+            res.emplace(toUser(findRes.value().view()));
     }
     return res;
 }

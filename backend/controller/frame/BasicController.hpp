@@ -1,8 +1,7 @@
 #if !defined(BASIC_CONTROLLER_HPP)
 #define BASIC_CONTROLLER_HPP
 
-#include "../util/RequestHelper.hpp"
-#include "ErrorController.hpp"
+#include "../../util/RequestHelper.hpp"
 
 #include <exception>
 #include <optional>
@@ -10,6 +9,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+#include "HandlerResult.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -19,46 +20,6 @@ using std::vector;
 using Headers = RequestHelper::Headers;
 
 namespace controller {
-
-// exception for the already defined http error (400, 500...)
-struct HttpException : public std::runtime_error {
-    static const int32_t CODE_SUCCESS = 200;
-    static const int32_t CODE_BAD_REQUEST = 400;
-    static const int32_t CODE_UNAUTHORIZED = 401;
-    static const int32_t CODE_CONFLICT = 409;
-    static const int32_t CODE_INTERNAL_ERROR = 500;
-
-    int32_t mCode;
-    HttpException(int32_t code = CODE_SUCCESS) : std::runtime_error("no message"), mCode(code) {}
-    HttpException(int32_t code, const string &msg) : std::runtime_error(msg), mCode(code) {}
-    ~HttpException() = default;
-};
-
-// result type a controller should return
-struct HandlerResult {
-    constexpr static char KEY_CODE[] = "CODE";
-    constexpr static char KEY_CONTENT[] = "CONTENT";
-
-    int32_t mCode;
-    string mContent;
-    vector<std::pair<string, string>> mHeaders;
-
-    HandlerResult(int32_t code = ErrorController::CODE_SUCCESS, const string &content = "",
-                  const vector<std::pair<string, string>> &headers = {})
-        : mCode(code), mContent(content), mHeaders(headers) {}
-    HandlerResult(int32_t code, string &&content, vector<std::pair<string, string>> &&headers) {
-        mCode = code;
-        mContent.swap(content);
-        headers.swap(headers);
-    }
-
-    string toJsonString() {
-        nlohmann::json res;
-        res[KEY_CODE] = mCode;
-        res[KEY_CONTENT] = mContent;
-        return res.dump();
-    }
-};
 
 // compare class for multi_map
 struct CompareIgnoreCase {

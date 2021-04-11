@@ -11,8 +11,9 @@
 #include <typeinfo>
 #include <vector>
 
-#include "../util/Utility.hpp"
+#include "../../util/Utility.hpp"
 #include "BasicController.hpp"
+#include "HandlerResult.hpp"
 
 using std::string;
 using std::vector;
@@ -87,7 +88,7 @@ template <typename... Args> struct ParamController : public BasicController {
     }
 };
 
-// Create a shared_ptr<BasicController> pointing to a ParamController* with specified Parameter
+// Create a shared_ptr<BasicController> pointing to a ParamController with specified Parameter
 // types. The object is created using new expression. Make it static so that it can be used by
 // static-member-function.
 template <typename... ParamTypes>

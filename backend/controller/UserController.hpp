@@ -4,7 +4,10 @@
 #include <optional>
 #include <string>
 
-#include "BasicController.hpp"
+#include "../util/RequestHelper.hpp"
+#include "frame/HandlerResult.hpp"
+
+using Headers = RequestHelper::Headers;
 
 using std::string;
 
@@ -16,6 +19,15 @@ HandlerResult userLogin(const optional<string> &email, const optional<string> &p
 
 HandlerResult userRegister(const optional<string> &email, const optional<string> &name,
                            const optional<string> &password);
+
+HandlerResult updatePassword();
+
+HandlerResult getUserFavoredSegmentIds(const Headers &headers);
+
+HandlerResult getUserFavoredSegments(const optional<int32_t> &page,
+                                     const optional<int32_t> pageSize, const Headers &headers);
+
+HandlerResult favorCodeSegment(const optional<string> &segmentId, const Headers &headers);
 
 } // namespace controller
 

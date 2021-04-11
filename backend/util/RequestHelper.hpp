@@ -27,8 +27,6 @@ struct RequestHelper {
     static const string &PARAM_KEY_USER_ID();
     static const string &PARAM_KEY_CODE_SEGMENT_ID();
 
-    static const string &HEADER_COOKIE_KEY_EMAIL();
-
     static const string &PATH_GET_CODE_SEGMENTS();
     static const string &PATH_ADD_CODE_SEGMENT();
     static const string &PATH_UPDATE_CODE_SEGMENT();

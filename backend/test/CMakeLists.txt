@@ -2,6 +2,8 @@
 enable_testing()
 
 aux_source_directory(../mongohelper/ TEST_MONGO_DIR)
+aux_source_directory(../entity/ TEST_MONGO_DIR)
+
 aux_source_directory(../eshelper/ TEST_ES_DIR)
 aux_source_directory(../util/ TEST_ES_DIR)
 aux_source_directory(../entity/ TEST_ES_DIR)
@@ -16,4 +18,4 @@ target_link_libraries(EsTest httplib)
 
 include(GoogleTest)
 gtest_discover_tests(MongoTest)
-# gtest_discover_tests(EsTest)
+gtest_discover_tests(EsTest)

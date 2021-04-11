@@ -44,8 +44,8 @@
 
 int main(int argc, char const *argv[]) {
     try {
-        startServer();
-        // testServer();
+        // startServer();
+        testServer();
     } catch (const std::exception &e) {
         fprintf(stderr, "ERROR! Server Start Failed: %s\n", e.what());
     }

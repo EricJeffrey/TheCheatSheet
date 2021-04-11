@@ -54,7 +54,9 @@ vector<Tag> getTags();
 // return optional<userId>
 std::optional<string> addUser(const User &user);
 
-std::optional<User> getUser(const string& userEmail);
+std::optional<User> getUserByEmail(const string& userEmail);
+
+std::optional<User> getUserById(const string& userId);
 
 // favor a code segment, return false if user has favored before
 bool favor(const string &userId, const string &codeSegmentId);

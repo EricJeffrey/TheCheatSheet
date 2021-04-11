@@ -15,15 +15,6 @@
 	// 	],
 	// 	"description": "Log output to console"
 	// }
-    "Request Handler": {
-        "scope": "cpp",
-        "prefix": "handler",
-        "body": [
-            "void $1(const httplib::Request &request, httplib::Response &response) {",
-            "    $0",
-            "}"
-        ]
-    },
     "String of the key of a field" :{
         "scope": "cpp",
         "prefix": "key of a field",

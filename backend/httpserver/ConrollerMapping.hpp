@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-#include "../controller/BasicController.hpp"
+#include "../controller/frame/BasicController.hpp"
 
 using std::string;
 using std::vector;

@@ -6,7 +6,8 @@
 using std::string;
 
 struct ResponseHelper {
-    static const string &HEADER_KEY_SET_COOKIE();
+    static constexpr char KEY_TOTAL_COUNT[] = "total";
+    static constexpr char KEY_CODE_SEGMENTS[] = "codeSegments";
 };
 
 #endif // RESPONSE_HELPER_HPP

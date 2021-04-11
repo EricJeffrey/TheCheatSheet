@@ -3,11 +3,11 @@
 
 #include "server.hpp"
 #include "../controller/CodeSegmentController.hpp"
-#include "../controller/ParamController.hpp"
 #include "../controller/TagController.hpp"
 #include "../controller/UserController.hpp"
-#include "../entity/EntityHelper.hpp"
+#include "../controller/frame/ParamController.hpp"
 #include "../lib/httplib.h"
+#include "../util/CookieHelper.hpp"
 #include "../util/RequestHelper.hpp"
 #include "ConrollerMapping.hpp"
 
@@ -56,6 +56,33 @@ vector<ControllerItem> &ControllerMapping() {
                     return controller::userRegister(get<0>(t), get<1>(t), get<2>(t));
                 })),
         },
+        // get user favors
+        ControllerItem{
+            M_GET,
+            RequestHelper::PATH_GET_USER_FAVORS(),
+            ParseOption::_PARAM & ParseOption::_HEADER,
+            makeParamController<int32_t, int32_t>(
+                RequestHelper::PATH_GET_USER_FAVORS(),
+                {
+                    RequestHelper::PARAM_KEY_PAGE(),
+                    RequestHelper::PARAM_KEY_PAGE_SIZE(),
+                },
+                {CookieHelper::KEY_COOKIE},
+                std::function([](ParamsType<int32_t, int32_t> const &t, const Headers &headers) {
+                    return controller::getUserFavoredSegments(get<0>(t), get<1>(t), headers);
+                })),
+        },
+        // get user favor segments ids
+        ControllerItem{
+            M_GET,
+            RequestHelper::PATH_GET_USER_FAVOR_IDS(),
+            ParseOption::_HEADER,
+            makeParamController<>(RequestHelper::PATH_GET_USER_FAVOR_IDS(), {},
+                                  {CookieHelper::KEY_COOKIE},
+                                  std::function([](ParamsType<> const &t, const Headers &headers) {
+                                      return controller::getUserFavoredSegmentIds(headers);
+                                  })),
+        },
         // get code segment
         ControllerItem{
             M_GET,
@@ -76,21 +103,83 @@ vector<ControllerItem> &ControllerMapping() {
                 })),
             {{0, "1"}, {1, "20"}, {2, "lastModified"}},
         },
+        // get tag list
+        ControllerItem{
+            M_GET,
+            RequestHelper::PATH_GET_TAG_LIST(),
+            ParseOption::_PARAM,
+            makeParamController<>(RequestHelper::PATH_GET_TAG_LIST(), {}, {},
+                                  std::function([](ParamsType<> const &t, const Headers &) {
+                                      return controller::getTagList();
+                                  })),
+        },
+        // favor segment
+        ControllerItem{
+            M_POST,
+            RequestHelper::PATH_FAVOR(),
+            ParseOption::_BODY & ParseOption::_HEADER,
+            makeParamController<string, string>(
+                RequestHelper::PATH_FAVOR(), {RequestHelper::PARAM_KEY_CODE_SEGMENT_ID()},
+                {CookieHelper::KEY_COOKIE},
+                std::function([](ParamsType<string, string> const &t, const Headers &headers) {
+                    return controller::favorCodeSegment(get<0>(t), headers);
+                })),
+        },
+        // search
+        ControllerItem{
+            M_GET,
+            RequestHelper::PATH_SEARCH_CODE_SEGMENT(),
+            ParseOption::_PARAM,
+            makeParamController<string, int32_t, int32_t>(
+                RequestHelper::PATH_SEARCH_CODE_SEGMENT(),
+                {
+                    RequestHelper::PARAM_KEY_TEXT(),
+                    RequestHelper::PARAM_KEY_PAGE(),
+                    RequestHelper::PARAM_KEY_PAGE_SIZE(),
+                },
+                {},
+                std::function(
+                    [](ParamsType<string, int32_t, int32_t> const &t, const Headers &headers) {
+                        return controller::search(get<0>(t), get<1>(t), get<2>(t));
+                    })),
+        },
+        // update code segment
+        ControllerItem{
+            M_POST,
+            RequestHelper::PATH_UPDATE_CODE_SEGMENT(),
+            ParseOption::_PARAM & ParseOption::_HEADER,
+            makeParamController<CodeSegment>(
+                RequestHelper::PATH_UPDATE_CODE_SEGMENT(),
+                {RequestHelper::PARAM_KEY_CODE_SEGMENT()}, {CookieHelper::KEY_COOKIE},
+                std::function([](ParamsType<CodeSegment> const &t, const Headers &headers) {
+                    return controller::updateCodeSegment(get<0>(t), headers);
+                })),
+        },
         // add code segment
         ControllerItem{
             M_POST,
             RequestHelper::PATH_ADD_CODE_SEGMENT(),
             ParseOption::_PARAM & ParseOption::_HEADER,
             makeParamController<CodeSegment>(
-                RequestHelper::PATH_ADD_CODE_SEGMENT(), {"codesegment"},
-                {
-                    RequestHelper::HEADER_COOKIE_KEY_EMAIL(),
-                },
+                RequestHelper::PATH_ADD_CODE_SEGMENT(), {RequestHelper::PARAM_KEY_CODE_SEGMENT()},
+                {CookieHelper::KEY_COOKIE},
                 std::function([](ParamsType<CodeSegment> const &t, const Headers &headers) {
                     return controller::addCodeSegment(get<0>(t), headers);
                 })),
         },
-        // tag
+        // add tag
+        ControllerItem{
+            M_POST,
+            RequestHelper::PATH_ADD_TAG(),
+            ParseOption::_PARAM & ParseOption::_HEADER,
+            makeParamController<string>(
+                RequestHelper::PATH_ADD_TAG(), {RequestHelper::PARAM_KEY_TAG()},
+                {CookieHelper::KEY_COOKIE},
+                std::function([](ParamsType<string> const &t, const Headers &headers) {
+                    return controller::addTag(get<0>(t), headers);
+                })),
+        },
+
     };
     return _CONTROLLER_MAPPING;
 }
@@ -161,7 +250,6 @@ auto handlerWrapper(size_t index, int32_t parseMask) {
 }
 
 void startServer() {
-
     httplib::Server server;
     auto &mapping = ControllerMapping();
     // routing
