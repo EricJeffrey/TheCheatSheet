@@ -15,8 +15,13 @@ add_subdirectory(test)
 
 aux_source_directory(. DIR_SRCS)
 aux_source_directory(./mongohelper DIR_SRCS)
-aux_source_directory(./elastichelper DIR_SRCS)
+aux_source_directory(./eshelper DIR_SRCS)
 aux_source_directory(./entity DIR_SRCS)
+aux_source_directory(./controller DIR_SRCS)
+aux_source_directory(./controller/frame DIR_SRCS)
+aux_source_directory(./util DIR_SRCS)
+aux_source_directory(./httpserver DIR_SRCS)
+aux_source_directory(./request DIR_SRCS)
 
 add_executable(cheatsheet_backend ${DIR_SRCS})
 

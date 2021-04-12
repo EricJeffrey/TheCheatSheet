@@ -1,7 +1,16 @@
 {
     "todo-tree.filtering.excludeGlobs": [
-        "lib"
+        "**/lib/**"
     ],
+    "cmake.ctestArgs": [
+        "-V"
+    ],
+    "editor.tokenColorCustomizations": {
+        "[One Dark Pro]": {
+            "keywords": "#0eb7d4"
+        }
+    },
+    "cmake.configureOnOpen": true,
     "files.associations": {
         "*.tcc": "cpp",
         "string": "cpp",
@@ -81,7 +90,10 @@
         "typeindex": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "version": "cpp"
+        "version": "cpp",
+        "forward_list": "cpp",
+        "valarray": "cpp",
+        "unordered_set": "cpp"
     },
-    "cmake.configureOnOpen": true
+    "python.pythonPath": "/bin/python3"
 }

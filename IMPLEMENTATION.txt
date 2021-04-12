@@ -10,6 +10,9 @@ NoSQL数据库实体
         password        - 密码
         favors          - 赞过的代码段列表
     代码段 codeSegment
+        _id             - MongoDB标识
+        esId            - Elasticsearch标识
+        mongoId         - MongoDB标识，仅在elasticsearch中使用，避免_id冲突
         title           - 标题
         description     - 描述
         content         - 内容
@@ -24,7 +27,8 @@ NoSQL数据库实体
 功能列表
     自动登录
         登录成功设置cookie实现
-        登录成功跳转到首页
+        登录成功跳转到首页 - 前端重定向
+        每次访问首页都重新Set-Cookie
     浏览查看 - 分页固定，每页的数目由客户端决定，响应数据包含总数目
         分页浏览所有代码
             按修改时间由近及远顺序
@@ -34,38 +38,64 @@ NoSQL数据库实体
             按点赞数排序分页浏览
         查看某个代码段
         复制代码段内容
-        点赞代码段
+        点赞代码段 - 通过cookie获取用户标识
     搜索代码段
     编辑操作 - lastModified、createdAt字段由客户端设置
-        新增代码段 - 代码段标题不可重复
-            新增tag - 客户端主动发起新增操作
+        新增代码段 - 代码段标题不可重复，先后添加到es和mongo，并设置esId
+            新增tag - 客户端发起
         修改某个代码段
+            新增代码段的tag - 客户端发起新增操作
+            删除代码段的tag - 与更新代码段时一同进行
     用户操作
         注册 - 完成后自动登入
         登入 - 设置cookie
         登出 - 清除cookie
-        修改密码 - 重设cookie
+        获取用户信息 - 使用cookie的uid
         查看赞过的代码段
 
 
 接口描述 - 与功能相对的前后端交互接口
     用户
-        登录                                                - POST:login:{[name: xxx|email: xxx], password: xxx}
-        注册                                                - POST:register:{email: xxx, name: xxx, password: xxx}
-        更新密码                                            - POST:updatePassword:{email: xxx, oldPassword: xxx, newPassword: xxx}
-        获取用户赞过的代码段第n页及总数                     - GET:userFavors?page=n&pageSize=n
-        获取用户赞过的所有代码段ID                          - Get:userFavorsId?
+        登录                                  - {_id: xxx}                         - POST:login:{email: xxx, password: xxx}
+        注册                                  - {_id: xxx}                         - POST:register:{email: xxx, name: xxx, password: xxx}
+        获取当前用户信息                      - {User...}                          - GET:userProfile
+        获取用户赞过的代码段第n页及总数       - {total: num, codeSegments: [...]}  - GET:userFavors?page=n&pageSize=n
+        获取用户赞过的所有代码段ID            - [...]                              - Get:userFavorIds?
     浏览
         按[时间顺序|点赞数顺序]
-            获取[某个标签]的第n页代码段及总数               - GET:codeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
-        获取所有标签                                        - GET:tagList
-        赞某个代码段                                        - POST:favor{userId: xxx, codeSegmentId=xxx}
-        获取第n页的搜索结果及总数                           - GET:search?text=xxx&page=n&pageSize=xxx
+            获取[某个标签]的第n页代码段及总数 - {total: num, codeSegments: [...]}  - GET:codeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
+        获取所有标签                          - [...]                              - GET:tagList
+        赞某个代码段                          - {}                                 - POST:favor{codeSegmentId=xxx}
+        获取第n页的搜索结果及总数             - {total: num, codeSegments: [...]}  - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
-        更新某个代码段                                      - POST:updateCodeSegment:{codeSegmentId:xxx, {updatedData...}}
-        新增代码段                                          - POST:addCodeSegment:{codeSegment}
-        新增tag                                             - POST:addTag:{tag}
-        删除tag                                             - POST:deleteTag:{tag}
+        更新某个代码段                        - {}                                 - POST:updateCodeSegment:{"codesegment": updated-codeSegment-with-id-not-modified}
+        新增代码段                            - {_id: xxx}                         - POST:addCodeSegment:{"codesegment": codeSegment}
+        新增tag                               - {_id: xxx}                         - POST:addTag:{"tag": tag}
+    返回值类型为 { code: 100/2xx/3xx, errorMsg: "xxx", result: {...}/[...] }
+
+杂项
+    固定分页 - 获取数据时同时获取数目
+    使用skip+limit(offset+limit)方式进行分页 - 百万数据量可能会产生性能问题
+    每个代码段对应多个标签
+    默认时间顺序
+    登录/登出后跳转到首页
+    搜索结果不支持按标签分类
+    仅在详情页面显示点赞按钮
+
+
+可扩展
+    代码段被查看数
+    创建时间/最后修改时间
+    分享功能
+    外部登录接口-手机号/微信/QQ...
+    分类与标签
+    标签使用词云
+    用户头像
+    绑定的社交账号
+    用户点赞的代码段按标签
+
+系统结构
+    HTTP服务器 + MongoDB + Elasticsearch
 
 
 用例
@@ -161,34 +191,3 @@ NoSQL数据库实体
         可以进入个人中心 - 点击个人按钮
             可以查看自己赞过的代码段 - 点击相关按钮
                 可以按照标签筛选 - 点击相关标签按钮
-            可以修改密码
-                需要输入
-                    原密码
-                    新密码 - 重复验证
-                可能的结果
-                    修改成功
-                    修改失败
-
-杂项
-    固定分页 - 获取数据时同时获取数目
-    使用skip+limit(offset+limit)方式进行分页 - 百万数据量可能会产生性能问题
-    每个代码段对应多个标签
-    默认时间顺序
-    登录/登出后跳转到首页
-    搜索结果不支持按标签分类
-    仅在详情页面显示点赞按钮
-
-
-可扩展
-    代码段被查看数
-    创建时间/最后修改时间
-    分享功能
-    外部登录接口-微信/QQ...
-    分类与标签
-    标签使用词云
-    用户头像
-    绑定的社交账号
-    用户点赞的代码段按标签
-
-系统结构
-    HTTP服务器 + MongoDB + Elasticsearch
