@@ -66,7 +66,7 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
 
 vector<string> getUserFavorsIds(const string &userId);
 
-int32_t countUserFavors(const string &userId);
+// int32_t countUserFavors(const string &userId);
 
 // create unique-index on Tag.value, User.email and CodeSegment.title
 bool mongoIndexInit();

@@ -29,7 +29,7 @@ namespace controller {
 
 HandlerResult getTagList() {
     HandlerResult operationResult{};
-    operationResult.set(nlohmann::json{mongohelper::getTags()}.dump());
+    operationResult.set(nlohmann::json(mongohelper::getTags()));
     return operationResult;
 }
 
@@ -40,12 +40,13 @@ HandlerResult addTag(const std::optional<string> &tag, const Headers &headers) {
         if (userFromMongoByIdFromCookie(headers).has_value()) {
             auto addRes = mongohelper::addTag(Tag{tag.value()});
             if (addRes.has_value())
-                operationResult.set(HandlerResult::MSG_SUCCESS + addRes.value());
+                operationResult.set(nlohmann::json{{Tag::KEY_ID, addRes.value()}});
             else
                 operationResult.set(HandlerResult::CODE_MONGODB_CONFLICT,
                                     HandlerResult::MSG_TAG_CONFLICT);
         } else {
-            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN,
+                                HandlerResult::MSG_NO_USER_NEED_LOGIN);
         }
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "tag value is required");

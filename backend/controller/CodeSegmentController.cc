@@ -68,8 +68,7 @@ HandlerResult getCodeSegments(const optional<int32_t> &page, const optional<int3
         operationResult.set(nlohmann::json{
             {ResponseHelper::KEY_TOTAL_COUNT, segments.size()},
             {ResponseHelper::KEY_CODE_SEGMENTS, segments},
-        }
-                                .dump());
+        });
     } while (false);
     if (httpError.hasException())
         throw httpError;
@@ -85,7 +84,8 @@ HandlerResult addCodeSegment(const optional<CodeSegment> &segmentOpt, const Head
             break;
         }
         if (!userFromMongoByIdFromCookie(headers).has_value()) {
-            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN,
+                                HandlerResult::MSG_NO_USER_NEED_LOGIN);
             break;
         }
         CodeSegment segment = segmentOpt.value();
@@ -95,10 +95,10 @@ HandlerResult addCodeSegment(const optional<CodeSegment> &segmentOpt, const Head
             segment.setEsId(tmpEsId.value());
             auto tmpId = mongohelper::addCodeSegment(segment);
             if (tmpId.has_value()) {
-                operationResult.set(HandlerResult::MSG_SUCCESS + (' ' + tmpId.value()));
+                operationResult.set(nlohmann::json{{CodeSegment::KEY_ID, tmpId.value()}});
             } else {
                 operationResult.set(HandlerResult::CODE_MONGODB_CONFLICT,
-                                    HandlerResult::MSG_TITLE_CONFLICT);
+                                    HandlerResult::MSG_CONFLICT_OR_INVALID_DATA);
             }
         } else {
             operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
@@ -120,8 +120,7 @@ HandlerResult search(const optional<string> &text, const optional<int32_t> &page
         operationResult.set(nlohmann::json{
             {ResponseHelper::KEY_TOTAL_COUNT, searchRes.size()},
             {ResponseHelper::KEY_CODE_SEGMENTS, searchRes},
-        }
-                                .dump());
+        });
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "invalid request parameter");
     }
@@ -130,18 +129,25 @@ HandlerResult search(const optional<string> &text, const optional<int32_t> &page
     return operationResult;
 }
 
-HandlerResult updateCodeSegment(const optional<CodeSegment> &t, const Headers &headers) {
+HandlerResult updateCodeSegment(const optional<CodeSegment> &segment, const Headers &headers) {
     HandlerResult operationResult;
     HttpException httpError;
-    if (t.has_value() && !t.value().mId.empty()) {
+    if (segment.has_value() && !segment.value().mId.empty()) {
         auto userOpt = userFromMongoByIdFromCookie(headers);
         if (userOpt.has_value()) {
-            if (!mongohelper::updateCodeSegment(t.value())) {
+            if (mongohelper::updateCodeSegment(segment.value())) {
+                auto updateRes = eshelper::updateCodeSegment(segment.value());
+                if (!updateRes) {
+                    operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
+                                        HandlerResult::MSG_UNKNOWN_ES_FAILURE);
+                }
+            } else {
                 operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
                                     HandlerResult::MSG_UNKNOWN_MONGO_FAILURE);
             }
         } else {
-            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN,
+                                HandlerResult::MSG_NO_USER_NEED_LOGIN);
         }
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "invalid request body");

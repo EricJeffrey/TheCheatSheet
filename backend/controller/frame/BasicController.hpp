@@ -9,6 +9,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <memory>
 
 #include "HandlerResult.hpp"
 
@@ -59,6 +60,8 @@ struct BasicController {
 
     // invoke the handler and return the result
     virtual HandlerResult invoke() = 0;
+
+    virtual std::unique_ptr<BasicController> clone() = 0;
 };
 } // namespace controller
 

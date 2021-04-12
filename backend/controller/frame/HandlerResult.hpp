@@ -19,51 +19,48 @@ struct HandlerResult {
 
     static constexpr char MSG_SUCCESS[] = "operation success";
     static constexpr char MSG_WRONG_PASSWORD[] = "wrong password";
-    static constexpr char MSG_WRONG_USER[] = "no such user";
-    static constexpr char MSG_NEED_LOGIN[] = "login needed";
-    static constexpr char MSG_TITLE_CONFLICT[] = "title conflict";
+    static constexpr char MSG_NO_SUCH_USER[] = "no such user";
+    static constexpr char MSG_NO_USER_NEED_LOGIN[] = "no such user, login needed";
+    static constexpr char MSG_CONFLICT_OR_INVALID_DATA[] = "db conflict or invalid data";
     static constexpr char MSG_TAG_CONFLICT[] = "tag value conflict";
     static constexpr char MSG_EMAIL_USED[] = "email already used";
     static constexpr char MSG_UNKNOWN_MONGO_FAILURE[] = "unknown mongodb failure";
     static constexpr char MSG_UNKNOWN_ES_FAILURE[] = "unknown elastic search failure";
 
-    constexpr static char KEY_CODE[] = "CODE";
-    constexpr static char KEY_CONTENT[] = "CONTENT";
+    constexpr static char KEY_CODE[] = "code";
+    constexpr static char KEY_ERROR_MSG[] = "errorMsg";
+    constexpr static char KEY_RESULT[] = "result";
 
     using RespHeaderItem = std::pair<string, string>;
 
     int32_t mCode;
-    string mContent;
+    string mErrorMsg;
+    nlohmann::json mResult;
     vector<RespHeaderItem> mHeaders;
 
-    HandlerResult(int32_t code = CODE_SUCCESS, const string &content = MSG_SUCCESS,
+    HandlerResult(int32_t code = CODE_SUCCESS, const string &errMsg = MSG_SUCCESS,
                   const vector<RespHeaderItem> &headers = {})
-        : mCode(code), mContent(content), mHeaders(headers) {}
-    HandlerResult(int32_t code, string &&content, vector<RespHeaderItem> &&headers) {
+        : mCode(code), mErrorMsg(errMsg), mResult(), mHeaders(headers) {}
+    HandlerResult(int32_t code, string &&errMsg, vector<RespHeaderItem> &&headers) {
         mCode = code;
-        mContent.swap(content);
+        mErrorMsg.swap(errMsg);
         headers.swap(headers);
     }
 
-    void set(int32_t code, const string &content, const vector<RespHeaderItem> &headers = {}) {
+    void set(int32_t code, const string &&errMsg, const vector<RespHeaderItem> &&headers = {}) {
         mCode = code;
-        set(content, headers);
-    }
-
-    void set(const string &content, const vector<RespHeaderItem> &headers = {}) {
-        mContent = content;
+        mErrorMsg = errMsg;
         mHeaders = headers;
     }
-    void set(const string &&content, const vector<RespHeaderItem> &headers = {}) {
-        mContent = content;
+
+    void set(const nlohmann::json &&result, const vector<RespHeaderItem> &&headers = {}) {
+        mResult = result;
         mHeaders = headers;
     }
 
     string toJsonString() {
-        nlohmann::json res;
-        res[KEY_CODE] = mCode;
-        res[KEY_CONTENT] = mContent;
-        return res.dump();
+        return nlohmann::json{{KEY_CODE, mCode}, {KEY_ERROR_MSG, mErrorMsg}, {KEY_RESULT, mResult}}
+            .dump();
     }
 
     bool isSuccess() { return mCode == CODE_SUCCESS; }

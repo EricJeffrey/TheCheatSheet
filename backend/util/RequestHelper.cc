@@ -114,8 +114,13 @@ const string &RequestHelper::PATH_GET_USER_FAVORS() {
     return _PATH_GET_USER_FAVORS;
 }
 const string &RequestHelper::PATH_GET_USER_FAVOR_IDS() {
-    const static string _PATH_GET_USER_FAVOR_IDS = "userFavorIds";
+    const static string _PATH_GET_USER_FAVOR_IDS = "/userFavorIds";
     return _PATH_GET_USER_FAVOR_IDS;
+}
+
+const string &RequestHelper::PATH_GET_USER_PROFILE() {
+    const static string _PATH_GET_USER_PROFILE = "/userProfile";
+    return _PATH_GET_USER_PROFILE;
 }
 
 #endif // KEY_HELPER_CC

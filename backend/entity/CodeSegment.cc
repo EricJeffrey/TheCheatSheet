@@ -8,9 +8,9 @@
 using NlohmannJson = nlohmann::json;
 
 CodeSegment::CodeSegment(const NlohmannJson &valJson, bool ignoreMId, bool ignoreEsId) {
-    if (!ignoreMId)
+    if (!ignoreMId && valJson.contains(KEY_ID))
         mId = valJson.at(KEY_ID).get<string>();
-    if (!ignoreEsId)
+    if (!ignoreEsId && valJson.contains(KEY_ES_ID))
         mEsId = valJson.at(KEY_ES_ID).get<string>();
     mTitle = valJson.at(KEY_TITLE).get<string>();
     mDescription = valJson.at(KEY_DESCRIPTION).get<string>();

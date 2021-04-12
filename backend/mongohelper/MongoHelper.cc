@@ -4,6 +4,8 @@
 
 #include "MongoHelper.hpp"
 
+#include <bsoncxx/exception/error_code.hpp>
+#include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/json.hpp>
 #include <mongoc/mongoc.h>
 #include <mongocxx/exception/operation_exception.hpp>
@@ -50,7 +52,7 @@ bsoncxx::document::view_or_value toBsonDoc(const User &user, bool ignoreId) {
     builder.append(kvp(User::KEY_EMAIL, user.mEmail));
     builder.append(kvp(User::KEY_PASSWORD, user.mPassword));
     builder.append(kvp(User::KEY_FAVORS, [&user](basicSubArray child) {
-        for (auto &&tmpId : user.mFavors) {
+        for (auto &&tmpId : user.mFavorIds) {
             child.append(oid(tmpId));
         }
     }));
@@ -88,7 +90,7 @@ User toUser(const bsoncxx::document::view &doc) {
     user.setEmail(doc[User::KEY_EMAIL].get_utf8().value.to_string());
     user.setPassword(doc[User::KEY_PASSWORD].get_utf8().value.to_string());
     const auto &favorsArray = doc[User::KEY_FAVORS].get_array().value;
-    std::transform(favorsArray.begin(), favorsArray.end(), std::back_inserter(user.mFavors),
+    std::transform(favorsArray.begin(), favorsArray.end(), std::back_inserter(user.mFavorIds),
                    [](const bsoncxx::array::element &v) { return v.get_oid().value.to_string(); });
     return user;
 }
@@ -111,7 +113,10 @@ std::optional<string> addCodeSegment(const CodeSegment &segment) {
             res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
         }
     } catch (const mongocxx::operation_exception &e) {
-        if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
+        if (e.code().value() != mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
+            throw;
+    } catch (const bsoncxx::exception &e) {
+        if (e.code() != bsoncxx::error_code::k_invalid_oid)
             throw;
     }
     return res;
@@ -193,11 +198,18 @@ bool updateCodeSegment(const CodeSegment &segment) {
         auto clientEntry = mongoClientEntry();
         auto collectionCodeSegment =
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-
-        auto replaceRes = collectionCodeSegment.replace_one(
-            streamDocument{} << CodeSegment::KEY_ID << oid(segment.mId) << finalize,
-            toBsonDoc(segment));
-        res = replaceRes.has_value() && replaceRes.value().matched_count() == 1;
+        try {
+            auto replaceRes = collectionCodeSegment.replace_one(
+                streamDocument{} << CodeSegment::KEY_ID << oid(segment.mId) << finalize,
+                toBsonDoc(segment));
+            res = replaceRes.has_value() && replaceRes.value().matched_count() == 1;
+        } catch (const mongocxx::exception &e) {
+            if (e.code().value() != mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
+                throw;
+        } catch (const bsoncxx::exception &e) {
+            if (e.code() != bsoncxx::error_code::k_invalid_oid)
+                throw;
+        }
     }
     return res;
 }
@@ -239,6 +251,8 @@ vector<Tag> getTags() {
     }
     return res;
 }
+
+// todo consider better return value
 
 std::optional<string> addUser(const User &user) {
     std::optional<string> res;
@@ -337,19 +351,11 @@ vector<string> getUserFavorsIds(const string &userId) {
     auto findRes =
         collectionUser.find_one(streamDocument{} << User::KEY_ID << oid(userId) << finalize);
     if (findRes.has_value())
-        res = toUser(findRes.value()).mFavors;
+        res = toUser(findRes.value()).mFavorIds;
     return res;
 }
 
-int32_t countUserFavors(const string &userId) {
-    // static const string fieldName = "count";
-    // int32_t res = 0;
-    // auto collectionUser = mongoCollection(MongoContext::COLLECTION_USER);
-    // auto cursor = collectionUser.aggregate(
-    //     pipeline{}.match(streamDocument{} << User::KEY_ID << oid(userId) <<
-    //     finalize).count(fieldName));
-    return getUserFavorsIds(userId).size();
-}
+// int32_t countUserFavors(const string &userId) { return getUserFavorsIds(userId).size(); }
 
 bool mongoIndexInit() {
     auto clientEntry = mongoClientEntry();

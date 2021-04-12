@@ -216,11 +216,11 @@ TEST(MongoTest, CRUDTest) {
         EXPECT_THROW(getUserFavorsIds("ThisWillNotBeAnIDToo").size(), bsoncxx::exception);
 
         /* countUserFavors */
-        fprintf(stderr, "testing--countUserFavors\n");
-        EXPECT_EQ(countUserFavors(testUserIds[0]), 2);
-        for (size_t i = 1; i < testUserIds.size(); i++) {
-            EXPECT_EQ(countUserFavors(testUserIds[i]), 0);
-        }
+        // fprintf(stderr, "testing--countUserFavors\n");
+        // EXPECT_EQ(countUserFavors(testUserIds[0]), 2);
+        // for (size_t i = 1; i < testUserIds.size(); i++) {
+        //     EXPECT_EQ(countUserFavors(testUserIds[i]), 0);
+        // }
     }
     fprintf(stderr, "testing--done\n");
 }

@@ -1,11 +1,13 @@
 #if !defined(CONTROLLER_MAPPING_HPP)
 #define CONTROLLER_MAPPING_HPP
 
+#include <functional>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "../controller/frame/BasicController.hpp"
+#include "../lib/httplib.h"
 
 using std::string;
 using std::vector;
@@ -34,5 +36,12 @@ struct ControllerItem {
     }
     ~ControllerItem() = default;
 };
+
+// path -> controller mapping: [ { method, path, controller }, ... ]
+vector<ControllerItem> &ControllerMapping();
+
+// handler wrapper - parse rquest parameters, body and headers
+std::function<int(const httplib::Request &request, httplib::Response &response)>
+handlerWrapper(size_t index, int32_t parseMask);
 
 #endif // CONTROLLER_MAPPING_HPP

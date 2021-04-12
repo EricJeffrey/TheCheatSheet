@@ -56,8 +56,8 @@ public:
         return *this;
     }
 
-    // construct from a json object
-    CodeSegment(const nlohmann::json &valJson, bool ignoreMId, bool ignoreEsId);
+    // construct from a json object, existence of id is not checked when converting
+    CodeSegment(const nlohmann::json &valJson, bool ignoreMId = false, bool ignoreEsId = false);
 
     // convert to nlohmann::json. use toJson if id fields are not needed
     operator nlohmann::json() const { return toJson(false, false); }

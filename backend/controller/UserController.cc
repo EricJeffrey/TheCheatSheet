@@ -12,6 +12,7 @@
 auto userFromMongoByIdFromCookie = [](const RequestHelper::Headers &headers) {
     std::optional<User> res;
     do {
+        // todo there might be not only one cookie
         auto it = headers.find(CookieHelper::KEY_COOKIE);
         if (it != headers.end()) {
             auto uid = CookieHelper::getCookieValue(CookieHelper::KEY_COOKIE_UID, it->second);
@@ -38,7 +39,7 @@ HandlerResult userLogin(const optional<string> &email, const optional<string> &p
             const auto &user = userOpt.value();
             if (EncryptHelper{}.encrypt(password.value()) == user.mPassword) {
                 operationResult.set(
-                    HandlerResult::MSG_SUCCESS,
+                    nlohmann::json{{User::KEY_ID, userOpt.value().mId}},
                     {{CookieHelper::KEY_SET_COOKIE,
                       CookieHelper::wrapCookie(CookieHelper::KEY_COOKIE_UID, user.mId)}});
             } else
@@ -46,7 +47,7 @@ HandlerResult userLogin(const optional<string> &email, const optional<string> &p
                                     HandlerResult::MSG_WRONG_PASSWORD);
         } else
             operationResult.set(HandlerResult::CODE_AUTHENTIC_FAILED,
-                                HandlerResult::MSG_WRONG_USER);
+                                HandlerResult::MSG_NO_SUCH_USER);
     } else
         httpError.set(HttpException::CODE_BAD_REQUEST, "email or password missing");
     if (httpError.hasException())
@@ -58,11 +59,12 @@ HandlerResult userRegister(const optional<string> &email, const optional<string>
                            const optional<string> &password) {
     HandlerResult operationResult;
     HttpException httpError;
-    if (email.has_value() && name.has_value() && password.has_value()) {
-        User user{name.value(), email.value(), password.value()};
+    if (email.has_value() && name.has_value() && password.has_value() && !email.value().empty() &&
+        !name.value().empty() && !password.value().empty()) {
+        User user{name.value(), email.value(), EncryptHelper{}.encrypt(password.value())};
         auto addRes = mongohelper::addUser(user);
         if (addRes.has_value()) {
-            operationResult.set(HandlerResult::MSG_SUCCESS + (' ' + addRes.value()));
+            operationResult.set(nlohmann::json{{User::KEY_ID, addRes.value()}});
         } else {
             operationResult.set(HandlerResult::CODE_MONGODB_CONFLICT,
                                 HandlerResult::MSG_EMAIL_USED);
@@ -81,10 +83,9 @@ HandlerResult getUserFavoredSegmentIds(const RequestHelper::Headers &headers) {
 
     auto userOpt = userFromMongoByIdFromCookie(headers);
     if (userOpt.has_value()) {
-        operationResult.set(
-            nlohmann::json{mongohelper::getUserFavorsIds(userOpt.value().mId)}.dump());
+        operationResult.set(nlohmann::json(mongohelper::getUserFavorsIds(userOpt.value().mId)));
     } else {
-        operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+        operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NO_USER_NEED_LOGIN);
     }
     if (httpError.hasException())
         throw httpError;
@@ -104,10 +105,10 @@ HandlerResult getUserFavoredSegments(const optional<int32_t> &page,
             operationResult.set(nlohmann::json{
                 {ResponseHelper::KEY_TOTAL_COUNT, favors.size()},
                 {ResponseHelper::KEY_CODE_SEGMENTS, favors},
-            }
-                                    .dump());
+            });
         } else {
-            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN,
+                                HandlerResult::MSG_NO_USER_NEED_LOGIN);
         }
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "invalid request parameter");
@@ -128,10 +129,25 @@ HandlerResult favorCodeSegment(const optional<string> &segmentId, const Headers 
                                     HandlerResult::MSG_UNKNOWN_MONGO_FAILURE);
             }
         } else {
-            operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NEED_LOGIN);
+            operationResult.set(HandlerResult::CODE_NEED_LOGIN,
+                                HandlerResult::MSG_NO_USER_NEED_LOGIN);
         }
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "parameter codeSegmentId is required");
+    }
+    if (httpError.hasException())
+        throw httpError;
+    return operationResult;
+}
+
+HandlerResult userProfile(const Headers &headers) {
+    HttpException httpError;
+    HandlerResult operationResult;
+    auto userOpt = userFromMongoByIdFromCookie(headers);
+    if (userOpt.has_value()) {
+        operationResult.set(userOpt.value().toJson());
+    } else {
+        operationResult.set(HandlerResult::CODE_NEED_LOGIN, HandlerResult::MSG_NO_USER_NEED_LOGIN);
     }
     if (httpError.hasException())
         throw httpError;

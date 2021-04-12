@@ -29,6 +29,8 @@ HandlerResult getUserFavoredSegments(const optional<int32_t> &page,
 
 HandlerResult favorCodeSegment(const optional<string> &segmentId, const Headers &headers);
 
+HandlerResult userProfile(const Headers &headers);
+
 } // namespace controller
 
 #endif // USER_CONTROLLER_HPP

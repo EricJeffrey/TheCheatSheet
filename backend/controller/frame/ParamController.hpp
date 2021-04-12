@@ -14,6 +14,7 @@
 #include "../../util/Utility.hpp"
 #include "BasicController.hpp"
 #include "HandlerResult.hpp"
+#include "HttpException.hpp"
 
 using std::string;
 using std::vector;
@@ -42,28 +43,24 @@ template <typename... Args> struct ParamController : public BasicController {
     // set the value of the parameter, support int32_t, int64_t, string or
     // is_convertible_v<string, decltype(v)>
     virtual void setParamValue(int32_t which, const string &val) {
-        auto modifier = [&val](auto &v) {
-            using std::optional;
-            using VType = decltype(v);
-            // fprintf(stderr, "DEBUG: val: %s, type(v): %s, is_same_v: %d\n", val.c_str(),
-            //         typeid(v).name(), std::is_same_v<decltype(v), optional<int32_t> &>);
+        auto modifier = [&val](std::optional<auto> &v) {
+            using VType = typename std::remove_reference<decltype(v)>::type::value_type;
+            using std::is_same_v;
             try {
-                if constexpr (std::is_same_v<VType, optional<int32_t> &>) {
-                    v = boost::lexical_cast<int>(val);
-                } else if constexpr (std::is_same_v<VType, optional<int64_t> &>) {
-                    v = std::stol(val);
-                    v = boost::lexical_cast<long>(val);
-                } else if constexpr (std::is_same_v<decltype(v), optional<string> &>) {
+                if constexpr (is_same_v<VType, int32_t>) {
+                    v.emplace(boost::lexical_cast<int>(val));
+                } else if constexpr (is_same_v<VType, int64_t>) {
+                    v.emplace(boost::lexical_cast<long>(val));
+                } else if constexpr (is_same_v<VType, string>) {
                     v = val;
-                } else if constexpr (std::is_convertible_v<string, VType> &&
-                                     std::is_copy_assignable_v<VType>) {
-                    v = static_cast<VType>(val);
+                } else if constexpr (std::is_convertible_v<string, VType>) {
+                    v.emplace(static_cast<VType>(val));
                 } else {
-                    // should throw exception? "unsupported type"
-                    static_assert(true, "unsupported type");
+                    throw std::runtime_error("unsupported type");
                 }
             } catch (std::bad_cast &e) {
-                throw HttpException(HttpException::CODE_BAD_REQUEST);
+                throw HttpException(HttpException::CODE_BAD_REQUEST,
+                                    "failed to set string parameter");
             }
         };
         visit_at(mParamValues, which, modifier);
@@ -71,20 +68,25 @@ template <typename... Args> struct ParamController : public BasicController {
 
     // set the value of a request body parameter
     virtual void setParamValue(int32_t which, const nlohmann::json &val) override {
-        auto modifier = [&val](auto &v) {
-            using VType = decltype(v);
+        auto modifier = [&val](std::optional<auto> &v) {
+            using VType = typename std::remove_reference<decltype(v)>::type::value_type;
+            constexpr bool REQUIRED_CONDITION = std::is_convertible<nlohmann::json, VType>::value;
+            static_assert(REQUIRED_CONDITION, "unsupported type");
             try {
-                if constexpr (std::is_convertible_v<nlohmann::json, VType> &&
-                              std::is_copy_assignable_v<VType>) {
-                    v = static_cast<VType>(val);
-                } else {
-                    static_assert(true, "unsupported type");
+                if constexpr (std::is_convertible_v<nlohmann::json, VType>) {
+                    v.emplace(static_cast<VType>(val));
                 }
             } catch (nlohmann::json::exception &e) {
-                throw HttpException(HttpException::CODE_BAD_REQUEST);
+                throw HttpException(HttpException::CODE_BAD_REQUEST,
+                                    "failed to set json parameter");
             }
         };
         visit_at(mParamValues, which, modifier);
+    }
+
+    virtual std::unique_ptr<BasicController> clone() override {
+        return std::unique_ptr<BasicController>{dynamic_cast<BasicController *>(new ParamController(
+            mPath, mRequiredParamNames, mRequiredHeaderNames, mParamValues, mHandler))};
     }
 };
 

@@ -44,5 +44,6 @@ struct RequestHelper {
     static const string &PATH_UPDATE_PASSWORD();
     static const string &PATH_GET_USER_FAVORS();
     static const string &PATH_GET_USER_FAVOR_IDS();
+    static const string &PATH_GET_USER_PROFILE();
 };
 #endif // KEY_HELPER_HPP
