@@ -4,11 +4,16 @@
 #include "EsContext.hpp"
 #include "../entity/CodeSegment.hpp"
 
-const char EsContext::HOST[] = "172.17.0.5";
-const int EsContext::port = 9200;
-const char EsContext::INDEX_CODE_SEGMENT[] = "codesegment";
+namespace eshelper {
 
-#endif // ES_CONTEXT_CC
+string EsContext::HOST = "172.17.0.5";
+int32_t EsContext::port = 9200;
+const string EsContext::INDEX_CODE_SEGMENT = "codesegment";
+
+void EsContext::config(const string &host, const int32_t port) {
+    EsContext::HOST = host;
+    EsContext::port = port;
+}
 
 const string &EsContext::INDEX_MAPPING_CODE_SEGMENT() {
     static const string mapping = "{"
@@ -67,3 +72,7 @@ const string &EsContext::INDEX_MAPPING_CODE_SEGMENT() {
                                   "}";
     return mapping;
 }
+
+} // namespace eshelper
+
+#endif // ES_CONTEXT_CC

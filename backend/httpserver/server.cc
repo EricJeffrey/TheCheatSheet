@@ -1,12 +1,16 @@
 #if !defined(SERVER_CC)
 #define SERVER_CC
 
-#include "server.hpp"
+#include <spdlog/spdlog.h>
+
+#include "../Config.hpp"
 #include "../eshelper/EsHelper.hpp"
 #include "../mongohelper/MongoHelper.hpp"
 #include "../util/CookieHelper.hpp"
 #include "../util/Utility.hpp"
+#include "../util/logger.hpp"
 #include "ControllerMapping.hpp"
+#include "server.hpp"
 
 void startServer() {
     httplib::Server server;
@@ -32,17 +36,16 @@ void startServer() {
     }
 
     /*
-    curl -X DELETE '172.17.0.5:9200/codesegment' && docker stop sjf_mongo_test && docker rm sjf_mongo_test &&  docker run -d --name sjf_mongo_test mongo:4.0 &&  docker inspect sjf_mongo_test | grep Addr
-    ./build/bin/cheatsheet_backend
- */
+curl -X DELETE '172.17.0.5:9200/codesegment' && \
+docker stop sjf_mongo_test && \
+docker rm sjf_mongo_test && \
+docker run -d --name sjf_mongo_test mongo:4.0 && \
+docker inspect sjf_mongo_test | grep Addr
+./build/bin/cheatsheet_backend
+    */
 
-    // mongo and elastic
-    if (mongohelper::mongoIndexInit() && eshelper::createIndex()) {
-        fprintf(stdout, "server started...\n");
-        server.listen("0.0.0.0", 8000);
-    } else {
-        throw std::runtime_error("failed to init mongodb and elasticsearch");
-    }
+    Logger()->info("TheCheatsheet Server started, listening on {}:{}", Config::host, Config::port);
+    server.listen(Config::host.c_str(), Config::port);
 }
 
 void testServer() {

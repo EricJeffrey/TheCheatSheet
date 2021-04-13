@@ -19,6 +19,7 @@ struct MongoContext {
     static string COLLECTION_CODE_SEGMENT;
     static string COLLECTION_USER;
     static string COLLECTION_TAG;
+    static void config(const string &host, const int32_t port);
 };
 
 mongocxx::pool::entry mongoClientEntry();

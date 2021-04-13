@@ -10,6 +10,8 @@
   - [gtest](https://github.com/google/googletest), testing library.
   - [nlohmann:json](https://github.com/nlohmann/json), json library.
   - [boost](https://boost.org/), boost library.
+  - [cxxopts](https://github.com/jarro2783/cxxopts), command line parse library.
+  - [spdlog](https://github.com/gabime/spdlog), logging library.
 
 ## 构建后端
 

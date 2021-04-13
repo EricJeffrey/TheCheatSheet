@@ -2,6 +2,8 @@
 mongo-cxx-driver/3.6.2
 gtest/1.10.0
 nlohmann_json/3.9.1
+cxxopts/2.2.1
+spdlog/1.8.5
 
 [generators]
 cmake

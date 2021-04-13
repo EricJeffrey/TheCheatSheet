@@ -11,6 +11,7 @@
 #include "../mongohelper/MongoHelper.hpp"
 #include "../util/CookieHelper.hpp"
 #include "../util/RequestHelper.hpp"
+#include "../util/logger.hpp"
 
 #include "nlohmann/json.hpp"
 
@@ -201,16 +202,17 @@ vector<ControllerItem> &ControllerMapping() {
 std::function<int(const httplib::Request &request, httplib::Response &response)>
 handlerWrapper(size_t index, int32_t parseMask) {
     return [index, parseMask](const httplib::Request &request, httplib::Response &response) {
+        Logger()->info("handle {} {}", request.method, request.path);
+
         using controller::HttpException;
+        // using unique_ptr here
+        auto controller = ControllerMapping()[index].mController->clone();
 
         // handy way for setting error code
         auto setError = [&response](int32_t status, const char *msg) {
             response.status = status;
             response.set_content(msg, CONTENT_TYPE_PLAIN().c_str());
         };
-
-        // using unique_ptr here
-        auto controller = ControllerMapping()[index].mController->clone();
 
         try {
             // extract request parameters
@@ -253,13 +255,17 @@ handlerWrapper(size_t index, int32_t parseMask) {
         } catch (const controller::HttpException &e) {
             setError(e.mCode, e.mMsg.c_str());
         } catch (nlohmann::detail::exception &e) {
+            Logger()->error("json exception: {}", e.what());
+
             setError(HttpException::CODE_BAD_REQUEST, e.what());
         } catch (const std::exception &e) {
-            fprintf(stderr, "DEBUG--exception! %s\n", e.what());
+            Logger()->error("exception: {}", e.what());
+
             setError(HttpException::CODE_INTERNAL_ERROR, "internal server error");
         } catch (...) {
+            Logger()->error("unknown exception");
+
             setError(HttpException::CODE_INTERNAL_ERROR, "unknow exception");
-            fprintf(stderr, "DEBUG--unknow exception\n");
         }
         return 0;
     };
