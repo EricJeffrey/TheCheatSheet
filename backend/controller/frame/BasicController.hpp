@@ -42,7 +42,7 @@ struct BasicController {
     BasicController(const string &path, const vector<string> &paramNames,
                     const vector<string> &headerNames)
         : mPath(path), mRequiredParamNames(paramNames), mRequiredHeaderNames(headerNames) {}
-    ~BasicController() = default;
+    virtual ~BasicController() = default;
 
     // set value of the request header
     void setHeaderValue(const string &key, const string &val) {

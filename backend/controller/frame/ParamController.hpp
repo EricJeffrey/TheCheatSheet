@@ -36,7 +36,7 @@ template <typename... Args> struct ParamController : public BasicController {
                     const HandlerType &handler)
         : BasicController(path, paramNames, headerNames), mParamValues(paramDefaultValues),
           mHandler(handler) {}
-    ~ParamController() = default;
+    virtual ~ParamController() = default;
 
     virtual HandlerResult invoke() override { return mHandler(mParamValues, mHeaders); }
 

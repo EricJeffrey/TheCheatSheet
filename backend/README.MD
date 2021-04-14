@@ -12,6 +12,10 @@
   - [boost](https://boost.org/), boost library.
   - [cxxopts](https://github.com/jarro2783/cxxopts), command line parse library.
   - [spdlog](https://github.com/gabime/spdlog), logging library.
+- 内存泄漏检查工具[valgrind](https://www.valgrind.org/).
+  ```sh
+  valgrind --leak-check=yes --log-file=./valgrind_cheatsheet_backend.log ./cheatsheet_backend -p 7080 --eshost 172.17.0.6 --mongohost 172.17.0.7
+  ```
 
 ## 构建后端
 
@@ -48,3 +52,5 @@ rm -f /data/cheatsheet/cheatsheet_backend.log # remove old log
 - [http get with request bod](https://stackoverflow.com/questions/978061/http-get-with-request-body)
 - [c11 way to index tuple at runtime without using switch](https://stackoverflow.com/questions/28997271/c11-way-to-index-tuple-at-runtime-without-using-switch)
 - [error code of the mongodb driver](https://github.com/mongodb/mongo-c-driver/blob/master/src/libmongoc/src/mongoc/mongoc-error.h)
+
+todo use external database file

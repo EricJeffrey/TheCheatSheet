@@ -142,6 +142,7 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     // search all
+    // FIXME should be skip((page - 1) * pageSize)
     if (tagId.empty()) {
         auto cursor = collectionCodeSegment.find({}, options.skip(page - 1).limit(pageSize));
         for (auto &&doc : cursor) {
@@ -149,6 +150,7 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
         }
     }
     // search by tag
+    // FIXME need skip
     else {
         auto cursor = collectionCodeSegment.find(
             streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize, options);
