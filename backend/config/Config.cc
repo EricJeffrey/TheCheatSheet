@@ -2,16 +2,14 @@
 #define CONFIG_CC
 
 #include "Config.hpp"
-#include "eshelper/EsContext.hpp"
-#include "mongohelper/MongoContext.hpp"
+#include "../eshelper/EsContext.hpp"
+#include "../mongohelper/MongoContext.hpp"
+#include "../util/logger.hpp"
 
 #include <string>
 #include <vector>
 
 #include <cxxopts.hpp>
-
-#include <spdlog/sinks/basic_file_sink.h>
-#include <spdlog/spdlog.h>
 
 using std::vector;
 
@@ -25,10 +23,10 @@ bool Config::logToFile = false;
 int32_t Config::maxLogFileSize = (1 << 20) * 10;
 int32_t Config::maxLogFileNumber = 10;
 
-string Config::mongoHost = "172.17.0.4";
+string Config::mongoHost = "127.0.0.1";
 int32_t Config::mongoPort = 27017;
 
-string Config::esHost = "172.17.0.5";
+string Config::esHost = "127.0.0.1";
 int32_t Config::esPort = 9200;
 
 bool Config::initConfigByArgs(int argc, char *argv[]) {
@@ -45,7 +43,6 @@ bool Config::initConfigByArgs(int argc, char *argv[]) {
     };
 
     CxxOptions options{"cheatsheet_backend", "web server for TheCheatsheet project"};
-    // host=0.0.0.0, port=8080, daemon=false, loglevel=info
     Adder(options.add_options())
         .add("d,daemon",
              "run as daemon, when set logs will be written into files as -o or --logout specified")
@@ -54,12 +51,12 @@ bool Config::initConfigByArgs(int argc, char *argv[]) {
              "set the log level, 2-debug,3-info,4-warn,5-err,6-critical,7-off, default info",
              cxxopts::value<int32_t>())
         .add("p,port", "port to listen on, default 8000", cxxopts::value<int32_t>())
-        .add("mongohost", "host of mongodb", cxxopts::value<string>())
-        .add("mongoport", "port of mongodb", cxxopts::value<int32_t>())
-        .add("eshost", "host of elasticsearch", cxxopts::value<string>())
+        .add("mongohost", "host of mongodb, default 127.0.0.1", cxxopts::value<string>())
+        .add("mongoport", "port of mongodb, default 27017", cxxopts::value<int32_t>())
+        .add("eshost", "host of elasticsearch, default 127.0.0.1", cxxopts::value<string>())
         .add("o,logout", "path to log file, default cheatsheet_backend.log at current dir",
              cxxopts::value<string>())
-        .add("esport", "port of elasticsearch", cxxopts::value<int32_t>())
+        .add("esport", "port of elasticsearch, default 9200", cxxopts::value<int32_t>())
         .add("h,help", "print usage");
 
     auto printUsage = [&options]() { fprintf(stdout, "%s\n", options.help().c_str()); };
@@ -81,22 +78,30 @@ bool Config::initConfigByArgs(int argc, char *argv[]) {
         Config::host = result["host"].as<string>();
     if (result.count("loglevel") > 0) {
         switch (result["loglevel"].as<int32_t>()) {
-        case 1:
-            spdlog::set_level(spdlog::level::debug);
+        case 2:
+            Logger()->set_level(spdlog::level::debug);
+            break;
         case 3:
-            spdlog::set_level(spdlog::level::info);
+            Logger()->set_level(spdlog::level::info);
+            break;
         case 4:
-            spdlog::set_level(spdlog::level::warn);
+            Logger()->set_level(spdlog::level::warn);
+            break;
         case 5:
-            spdlog::set_level(spdlog::level::err);
+            Logger()->set_level(spdlog::level::err);
+            break;
         case 6:
-            spdlog::set_level(spdlog::level::critical);
+            Logger()->set_level(spdlog::level::critical);
+            break;
         case 7:
-            spdlog::set_level(spdlog::level::off);
+            Logger()->set_level(spdlog::level::off);
+            break;
         default:
             printUsage();
             return false;
         }
+    } else {
+        Logger()->set_level(spdlog::level::info);
     }
     if (result.count("port") > 0)
         Config::port = result["port"].as<int32_t>();

@@ -4,6 +4,7 @@
 #include "EsHelper.hpp"
 #include "../lib/httplib.h"
 #include "../util/Utility.hpp"
+#include "../util/logger.hpp"
 #include "EsContext.hpp"
 #include "nlohmann/json.hpp"
 
@@ -100,6 +101,7 @@ bool createIndex() {
         // acknowledged will be false if timed-out, so just check error
         if (!respJson.contains("error"))
             res = true;
+        Logger()->debug("create elasticsearch index result: {}", respJson.dump());
     }
     return res;
 }

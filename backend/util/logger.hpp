@@ -1,7 +1,7 @@
 #if !defined(LOGGER_H)
 #define LOGGER_H
 
-#include "../Config.hpp"
+#include "../config/Config.hpp"
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/stdout_color_sinks.h>

@@ -3,7 +3,7 @@
 
 #include <spdlog/spdlog.h>
 
-#include "../Config.hpp"
+#include "../config/Config.hpp"
 #include "../eshelper/EsHelper.hpp"
 #include "../mongohelper/MongoHelper.hpp"
 #include "../util/CookieHelper.hpp"
@@ -34,15 +34,6 @@ void startServer() {
             break;
         }
     }
-
-    /*
-curl -X DELETE '172.17.0.5:9200/codesegment' && \
-docker stop sjf_mongo_test && \
-docker rm sjf_mongo_test && \
-docker run -d --name sjf_mongo_test mongo:4.0 && \
-docker inspect sjf_mongo_test | grep Addr
-./build/bin/cheatsheet_backend
-    */
 
     Logger()->info("TheCheatsheet Server started, listening on {}:{}", Config::host, Config::port);
     server.listen(Config::host.c_str(), Config::port);

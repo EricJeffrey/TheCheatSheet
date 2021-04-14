@@ -1,7 +1,7 @@
 #include <cstdio>
 #include <exception>
 
-#include "Config.hpp"
+#include "config/Config.hpp"
 #include "eshelper/EsHelper.hpp"
 #include "httpserver/server.hpp"
 #include "mongohelper/MongoHelper.hpp"
@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
             Logger()->info("TheCheatsheet web server starting...");
             Logger()->info(
                 "Configuration loaded: server listen on:{}, mongodb at:{}, elasticsearch at:{}",
-                listenAddr, esAddr, esAddr);
+                listenAddr, mongoAddr, esAddr);
             Logger()->info("Connectiong to MongoDB at {} ...", mongoAddr);
 
             if (mongohelper::mongoIndexInit()) {

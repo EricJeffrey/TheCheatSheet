@@ -22,6 +22,7 @@ aux_source_directory(./controller/frame DIR_SRCS)
 aux_source_directory(./util DIR_SRCS)
 aux_source_directory(./httpserver DIR_SRCS)
 aux_source_directory(./request DIR_SRCS)
+aux_source_directory(./config DIR_SRCS)
 
 add_executable(cheatsheet_backend ${DIR_SRCS})
 

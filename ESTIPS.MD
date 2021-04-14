@@ -31,6 +31,7 @@
     # 容器内执行
     /usr/share/elasticsearch/bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.2/elasticsearch-analysis-ik-7.9.2.zip
     exit # 退出容器
+    docker restart cheatsheet_es #重启容器
     ```
 
 ## 使用
