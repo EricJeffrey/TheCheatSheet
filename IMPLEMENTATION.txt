@@ -20,6 +20,7 @@ NoSQL数据库实体
         lastModified    - 最后修改时间 ms
         favorNumber     - 点赞数
         tagList         - 标签列表
+todo 标签列表包含值而不是id
     标签
         value           - 标签值，不区分大小写
 
@@ -68,8 +69,8 @@ NoSQL数据库实体
         赞某个代码段                          - {}                                 - POST:favor{codeSegmentId=xxx}
         获取第n页的搜索结果及总数             - {codeSegments: [...]}  - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
-        更新某个代码段                        - {}                                 - POST:updateCodeSegment:{"codesegment": updated-codeSegment-with-id-not-modified}
-        新增代码段                            - {_id: xxx}                         - POST:addCodeSegment:{"codesegment": codeSegment}
+        更新某个代码段                        - {}                                 - POST:updateCodeSegment:{"codeSegment": updated-codeSegment-with-id-not-modified}
+        新增代码段                            - {_id: xxx}                         - POST:addCodeSegment:{"codeSegment": codeSegment}
         新增tag                               - {_id: xxx}                         - POST:addTag:{"tag": tag}
     返回值类型为 { code: 100/2xx/3xx, errorMsg: "xxx", result: {...}/[...] }
 
@@ -85,7 +86,6 @@ NoSQL数据库实体
 
 可扩展
     代码段被查看数
-    创建时间/最后修改时间
     分享功能
     外部登录接口-手机号/微信/QQ...
     分类与标签
