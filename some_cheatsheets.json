@@ -3,7 +3,7 @@
         "content": "# 当前时间\ndatetime.datetime.now().strftime(\"%Y-%m-%d %H:%M:%S\")\ntime.strftime(\"%Y-%m-%d %H:%M:%S\", time.localtime(time.time()))\n# 某个时间戳\ntime.strftime(\"%Y-%m-%d %H:%M:%S\", time.localtime(23333333333))\n",
         "description": "",
         "tagList": [
-          "python's_id_but_failed",
+            "python"
         ],
         "title": "python 时间戳转日期"
     },
@@ -11,7 +11,7 @@
         "content": "# execute `some_command args` for 1 mininute and send TERM signal after that\ntimeout --signal TERM 1m some_command args\n",
         "description": "",
         "tagList": [
-          "linux"
+            "Linux"
         ],
         "title": "linux使用timeout命令限制任务的执行时间"
     },
@@ -19,8 +19,8 @@
         "content": "p {\n  /* width need to be fixed, parent element also need fixed width if use percent or flexbox */\n  width: 200px;\n  border: 1px solid;\n  padding: 2px 5px;\n\n  /* BOTH of the following are required for text-overflow, including parent elements */\n  white-space: nowrap;\n  overflow: hidden;\n}\n",
         "description": "使用css的text-overflow属性使文本内容裁剪或显示省略号",
         "tagList": [
-          "html",
-          "css"
+            "html",
+            "css"
         ],
         "title": "HTML-CSS文本超过长度显示省略号"
     },

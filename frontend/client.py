@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 import subprocess
 from os import execl, getenv, makedirs
 import sys
@@ -228,7 +228,7 @@ subcommand:
                 print("content (multi lines, use " + exitKey +
                       " on a NEW LINE to end input): ",  flush=True)
                 content = sys.stdin.read()
-                print("tags (comma seperated, i.e. linux,java ): ",
+                print("tags (comma seperated, e.g. linux,java ): ",
                       end='', flush=True)
                 tags = sys.stdin.readline().strip()
                 tagList = [x.strip() for x in tags.split(',')]
@@ -259,8 +259,7 @@ subcommand:
                 text = input("text: ").strip()
                 success, segments = search(text)
                 if success:
-                    out = "---------------------------------------------\n\n" if len(
-                        segments) > 0 else "Nothing Found ~(￣▽￣)~*"
+                    out = "" if len(segments) > 0 else "Nothing Found ~(￣▽￣)~*"
                     for segment in segments:
                         out += "Title: " + segment["title"]
                         out += "\n"

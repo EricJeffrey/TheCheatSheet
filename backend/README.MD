@@ -30,15 +30,24 @@
 ## 运行后端
 
 0. MongoDB:4.0和Elasticsearch:7.9.2，可以使用docker运行容器，Elasticsearch需要安装中文分词工具并重启，参加[ESTIPS](../ESTIPS.MD).
-1. 确保MongoDB未创建数据库 - 移除旧的，创建新的容器，Elasticsearch未创建索引 - 删除索引 `curl -X DELETE '172.17.0.6:9200/codesegment'`
-2. 获取MongoDB和Elasticsearch的地址及端口 `docker inspect name_of_mongodb | grep IPAddress && docker inspect name_of_es | grep IPAddress`
-3. 执行`./cheatsheet_backend -p 7080 --eshost address_of_es --mongohost address_of_mongodb`启动程序，`cheatsheet_backend -h`提供了其它配置如端口等的信息
+1. 启动MongoDB，挂载外部数据库文件: `docker run -d --name -v cheatsheet_mongo /data/cheatsheet/mongo:/data/db mongo:4.0`
+2. Elasticsearch
+   1. 启动并挂载外部数据 `docker run -d --name cheatsheet_es -v /data/cheatsheet/elasticsearch:/usr/share/elasticsearch/data -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.9.2`
+   2. 安装中文分词插件 `docker exec -it cheatsheet_es /usr/share/elasticsearch/bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.2/elasticsearch-analysis-ik-7.9.2.zip`
+   3. 重启 `docker restart cheatsheet_es`
+3. 确保MongoDB未创建数据库 - 可以通过创建新容器保证
+4. 确保 Elasticsearch未创建索引 - 可以手动删除索引 `curl -X DELETE '172.17.0.6:9200/codesegment'`
+5. 获取MongoDB和Elasticsearch的地址及端口 `docker inspect name_of_mongodb | grep IPAddress && docker inspect name_of_es | grep IPAddress`
+6. 执行`./cheatsheet_backend -p 7080 --eshost ADDRESS_OF_ES --mongohost ADDRESS_OF_MONGO`启动程序，`cheatsheet_backend -h` 提供了其它配置如端口等的信息
 
 完整
 ```sh
-curl -X DELETE '172.17.0.6:9200/codesegment' # remove old index
-docker stop cheatsheet_mongo && docker rm cheatsheet_mongo # stop and remove
-docker run -d --name cheatsheet_mongo mongo:4.0 # run a new mongodb instance
+mkdir /data/cheatsheet/mongo
+mkdir /data/cheatsheet/elasticsearch
+docker run -d --name -v cheatsheet_mongo /data/cheatsheet/mongo:/data/db mongo:4.0
+docker run -d --name cheatsheet_es -v /data/cheatsheet/elasticsearch:/usr/share/elasticsearch/data -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.9.2
+docker exec -it cheatsheet_es /usr/share/elasticsearch/bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.2/elasticsearch-analysis-ik-7.9.2.zip
+docker restart cheatsheet_es
 docker inspect cheatsheet_mongo | grep IPAddress && docker inspect cheatsheet_es | grep IPAddress # get ip address
 
 rm -f /data/cheatsheet/cheatsheet_backend.log # remove old log
@@ -53,5 +62,4 @@ rm -f /data/cheatsheet/cheatsheet_backend.log # remove old log
 - [c11 way to index tuple at runtime without using switch](https://stackoverflow.com/questions/28997271/c11-way-to-index-tuple-at-runtime-without-using-switch)
 - [error code of the mongodb driver](https://github.com/mongodb/mongo-c-driver/blob/master/src/libmongoc/src/mongoc/mongoc-error.h)
 
-todo use external database file
 todo detect memory leak on JMeter testing
