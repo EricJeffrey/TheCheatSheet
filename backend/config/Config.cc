@@ -54,9 +54,9 @@ bool Config::initConfigByArgs(int argc, char *argv[]) {
         .add("mongohost", "host of mongodb, default 127.0.0.1", cxxopts::value<string>())
         .add("mongoport", "port of mongodb, default 27017", cxxopts::value<int32_t>())
         .add("eshost", "host of elasticsearch, default 127.0.0.1", cxxopts::value<string>())
+        .add("esport", "port of elasticsearch, default 9200", cxxopts::value<int32_t>())
         .add("o,logout", "path to log file, default cheatsheet_backend.log at current dir",
              cxxopts::value<string>())
-        .add("esport", "port of elasticsearch, default 9200", cxxopts::value<int32_t>())
         .add("h,help", "print usage");
 
     auto printUsage = [&options]() { fprintf(stdout, "%s\n", options.help().c_str()); };

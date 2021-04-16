@@ -202,7 +202,8 @@ vector<ControllerItem> &ControllerMapping() {
 std::function<int(const httplib::Request &request, httplib::Response &response)>
 handlerWrapper(size_t index, int32_t parseMask) {
     return [index, parseMask](const httplib::Request &request, httplib::Response &response) {
-        Logger()->info("handle {} {}", request.method, request.path);
+        Logger()->info("{} {} from {}:{}", request.method, request.path, request.remote_addr,
+                       request.remote_port);
 
         using controller::HttpException;
         // using unique_ptr here

@@ -100,11 +100,11 @@ HandlerResult getUserFavoredSegments(const optional<int32_t> &page,
     if (page.has_value() && pageSize.has_value() && page.value() >= 1 && pageSize.value() >= 1) {
         auto userOpt = userFromMongoByIdFromCookie(headers);
         if (userOpt.has_value()) {
-            auto favors =
+            auto tmp =
                 mongohelper::getUserFavors(userOpt.value().mId, page.value(), pageSize.value());
             operationResult.set(nlohmann::json{
-                {ResponseHelper::KEY_TOTAL_COUNT, favors.size()},
-                {ResponseHelper::KEY_CODE_SEGMENTS, favors},
+                {ResponseHelper::KEY_TOTAL_COUNT, tmp.mCount},
+                {ResponseHelper::KEY_CODE_SEGMENTS, tmp.mData},
             });
         } else {
             operationResult.set(HandlerResult::CODE_NEED_LOGIN,

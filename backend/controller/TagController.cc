@@ -38,7 +38,7 @@ HandlerResult addTag(const std::optional<string> &tag, const Headers &headers) {
     HttpException httpError;
     if (tag.has_value() && !tag.value().empty()) {
         if (userFromMongoByIdFromCookie(headers).has_value()) {
-            auto addRes = mongohelper::addTag(Tag{tag.value()});
+            auto addRes = mongohelper::addTag(tag.value());
             if (addRes.has_value())
                 operationResult.set(nlohmann::json{{Tag::KEY_ID, addRes.value()}});
             else

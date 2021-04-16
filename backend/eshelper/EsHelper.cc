@@ -52,6 +52,7 @@ bool updateCodeSegment(const CodeSegment &segment) {
 }
 
 vector<CodeSegment> search(const string &text, int32_t page, int32_t pagesSize) {
+    // fuzzy query might be better?
     vector<CodeSegment> res;
     res.reserve(pagesSize);
     httplib::Client client{EsContext::HOST, EsContext::port};

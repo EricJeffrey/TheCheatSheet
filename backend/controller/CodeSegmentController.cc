@@ -58,22 +58,22 @@ HandlerResult getCodeSegments(const optional<int32_t> &page, const optional<int3
                 break;
             }
         }
-        vector<CodeSegment> segments;
+        mongohelper::SegmentsWithTotalCount tmp;
         if (tag.has_value()) {
-            segments =
-                mongohelper::getCodeSegments(page.value(), pageSize.value(), order, tag.value());
+            tmp = mongohelper::getCodeSegments(page.value(), pageSize.value(), order, tag.value());
         } else {
-            segments = mongohelper::getCodeSegments(page.value(), pageSize.value(), order);
+            tmp = mongohelper::getCodeSegments(page.value(), pageSize.value(), order);
         }
         operationResult.set(nlohmann::json{
-            {ResponseHelper::KEY_TOTAL_COUNT, segments.size()},
-            {ResponseHelper::KEY_CODE_SEGMENTS, segments},
+            {ResponseHelper::KEY_TOTAL_COUNT, tmp.mCount},
+            {ResponseHelper::KEY_CODE_SEGMENTS, tmp.mData},
         });
     } while (false);
     if (httpError.hasException())
         throw httpError;
     return operationResult;
 }
+
 
 HandlerResult addCodeSegment(const optional<CodeSegment> &segmentOpt, const Headers &headers) {
     HandlerResult operationResult;
@@ -89,6 +89,22 @@ HandlerResult addCodeSegment(const optional<CodeSegment> &segmentOpt, const Head
             break;
         }
         CodeSegment segment = segmentOpt.value();
+        // add tag to mongodb first
+        bool tagAdded = true;
+        for (auto &&tag : segment.mTagList) {
+            auto tagIdOpt = mongohelper::addTag(tag);
+            if (!tagIdOpt.has_value()) {
+                // no one knows what happened if here
+                tagAdded = false;
+                break;
+            }
+        }
+        if (!tagAdded) {
+            operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
+                                HandlerResult::MSG_UNKNOWN_MONGO_FAILURE);
+            break;
+        }
+        // add to es
         auto tmpEsId = eshelper::addCodeSegment(segment);
         if (tmpEsId.has_value()) {
             // add to mongo
@@ -101,6 +117,7 @@ HandlerResult addCodeSegment(const optional<CodeSegment> &segmentOpt, const Head
                                     HandlerResult::MSG_CONFLICT_OR_INVALID_DATA);
             }
         } else {
+            // FIXME should remove from es if failed
             operationResult.set(HandlerResult::CODE_UNKNOWN_FAILED,
                                 HandlerResult::MSG_UNKNOWN_ES_FAILURE);
         }
@@ -117,10 +134,7 @@ HandlerResult search(const optional<string> &text, const optional<int32_t> &page
     if (text.has_value() && !text.value().empty() && page.has_value() && page.value() >= 1 &&
         pageSize.has_value() && pageSize.value() >= 1) {
         auto searchRes = eshelper::search(text.value(), page.value(), pageSize.value());
-        operationResult.set(nlohmann::json{
-            {ResponseHelper::KEY_TOTAL_COUNT, searchRes.size()},
-            {ResponseHelper::KEY_CODE_SEGMENTS, searchRes},
-        });
+        operationResult.set(nlohmann::json{{ResponseHelper::KEY_CODE_SEGMENTS, searchRes}});
     } else {
         httpError.set(HttpException::CODE_BAD_REQUEST, "invalid request parameter");
     }

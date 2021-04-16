@@ -21,7 +21,7 @@ NoSQL数据库实体
         favorNumber     - 点赞数
         tagList         - 标签列表
     标签
-        value           - 标签值
+        value           - 标签值，不区分大小写
 
 
 功能列表
@@ -66,7 +66,7 @@ NoSQL数据库实体
             获取[某个标签]的第n页代码段及总数 - {total: num, codeSegments: [...]}  - GET:getCodeSegments?sortBy=[favorNumber|lastModified]&[tag=xxx]&page=n&pageSize=n
         获取所有标签                          - [...]                              - GET:tagList
         赞某个代码段                          - {}                                 - POST:favor{codeSegmentId=xxx}
-        获取第n页的搜索结果及总数             - {total: num, codeSegments: [...]}  - GET:search?text=xxx&page=n&pageSize=xxx
+        获取第n页的搜索结果及总数             - {codeSegments: [...]}  - GET:search?text=xxx&page=n&pageSize=xxx
     编辑
         更新某个代码段                        - {}                                 - POST:updateCodeSegment:{"codesegment": updated-codeSegment-with-id-not-modified}
         新增代码段                            - {_id: xxx}                         - POST:addCodeSegment:{"codesegment": codeSegment}

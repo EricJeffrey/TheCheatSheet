@@ -82,22 +82,25 @@ var tester = {
                 createdAt: 1618205862167,
                 lastModified: 1618205862167,
                 favorNumber: 344,
-                tagList: [this.testRespList[8.1].msg.result._id],
+                tagList: ["python", "java", "nothing"],
             }
         });
-        await testNext(9.1, PATH_ADD_CODE_SEGMENT, doPost, {
-            codeSegment: {
-                title: "actuall with title" + randStr(),
-                description: "description with " + randStr(),
-                content: "night mare, night song, song of the night, sound of silence",
-                createdAt: 1618205862167,
-                lastModified: 1618205862167,
-                favorNumber: 23,
-                tagList: [this.testRespList[8.2].msg.result._id],
-            }
-        });
+        for (let i = 1; i < 23; i++) {
+            const ii = i;
+            await testNext(9 + i * 0.1, PATH_ADD_CODE_SEGMENT, doPost, {
+                codeSegment: {
+                    title: " actuall with title" + randStr() + "--" + ii,
+                    description: "description with " + randStr(),
+                    content: "night mare, night song, song of the night, sound of silence",
+                    createdAt: 1618205862167,
+                    lastModified: 1618205862167,
+                    favorNumber: 23,
+                    tagList: ["Python", randStr(3), randStr(5), "win", "C++", "sdlfk"],
+                }
+            });
+        }
         await testNext(10, PATH_GET_CODE_SEGMENTS, doGet, { page: 1, pageSize: 3 });
-        await testNext(11, PATH_GET_CODE_SEGMENTS, doGet, { page: 2, pageSize: 2 });
+        await testNext(11, PATH_GET_CODE_SEGMENTS, doGet, { page: 3, pageSize: 6 });
         await testNext(12, PATH_GET_USER_FAVOR_IDS, doGet, null);
         await testNext(13, PATH_GET_USER_FAVORS, doGet, { page: 1, pageSize: 20 });
         await testNext(14, PATH_FAVOR, doPost, { codeSegmentId: tester.testRespList[10].msg.result.codeSegments[0]._id });
@@ -112,7 +115,7 @@ var tester = {
                 createdAt: 1618205012167,
                 lastModified: 1618205872167,
                 favorNumber: 344,
-                tagList: [this.testRespList[8.2].msg.result._id],
+                tagList: [],
             }
         });
         await testNext(19, PATH_ADD_TAG, doPost, { "tag": "addedtag" });
@@ -127,18 +130,17 @@ var tester = {
                 createdAt: 1618205712167,
                 lastModified: 1618205972167,
                 favorNumber: 844,
-                tagList: [this.testRespList[8.3].msg.result._id],
+                tagList: ["win", "JAVA", "HTML"],
             }
         });
+        await testNext(22, PATH_GET_TAG_LIST, doGet);
         // sleep a while for es to index
         await sleep(200);
         await testNext(22, PATH_SEARCH_CODE_SEGMENT, doGet, { text: "dance", page: 1, pageSize: 33 });
-        // await testNext(23, PATH_SEARCH_CODE_SEGMENT, doGet, { text: "updated", page: -1, pageSize: 33 });
         await testNext(24, PATH_GET_USER_FAVOR_IDS, doGet, null);
         return 0;
     }
 };
-
 
 
 tester.startTetst().then(v => console.log("DONE"));

@@ -1,4 +1,3 @@
-
 #if !defined(MONGO_HELPER_CC)
 #define MONGO_HELPER_CC
 
@@ -37,8 +36,8 @@ bsoncxx::document::view_or_value toBsonDoc(const CodeSegment &codeSegment, bool 
     builder.append(kvp(CodeSegment::KEY_LAST_MODIFIED, codeSegment.mLastModified));
     builder.append(kvp(CodeSegment::KEY_FAVOR_NUMBER, codeSegment.mFavorNumber));
     builder.append(kvp(CodeSegment::KEY_TAG_LIST, [&codeSegment](basicSubArray child) {
-        for (auto &&tmpId : codeSegment.mTagList) {
-            child.append(oid(tmpId));
+        for (auto &&tmpTag : codeSegment.mTagList) {
+            child.append(tmpTag);
         }
     }));
     return builder.extract();
@@ -52,8 +51,8 @@ bsoncxx::document::view_or_value toBsonDoc(const User &user, bool ignoreId) {
     builder.append(kvp(User::KEY_EMAIL, user.mEmail));
     builder.append(kvp(User::KEY_PASSWORD, user.mPassword));
     builder.append(kvp(User::KEY_FAVORS, [&user](basicSubArray child) {
-        for (auto &&tmpId : user.mFavorIds) {
-            child.append(oid(tmpId));
+        for (auto &&tmpSegmentId : user.mFavorIds) {
+            child.append(oid(tmpSegmentId));
         }
     }));
     return builder.extract();
@@ -79,7 +78,7 @@ CodeSegment toCodeSegment(const bsoncxx::document::view &doc) {
     codeSegment.setFavorNumber(doc[CodeSegment::KEY_FAVOR_NUMBER].get_int32().value);
     const auto &tagArray = doc[CodeSegment::KEY_TAG_LIST].get_array().value;
     std::transform(tagArray.begin(), tagArray.end(), std::back_inserter(codeSegment.mTagList),
-                   [](const bsoncxx::array::element &v) { return v.get_oid().value.to_string(); });
+                   [](const bsoncxx::array::element &v) { return v.get_utf8().value.to_string(); });
     return codeSegment;
 }
 
@@ -122,15 +121,15 @@ std::optional<string> addCodeSegment(const CodeSegment &segment) {
     return res;
 }
 
-vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder sortBy,
-                                    const string &tagId) {
-    vector<CodeSegment> res;
-    res.reserve(pageSize);
+SegmentsWithTotalCount getCodeSegments(int32_t page, int32_t pageSize, SortOrder sortBy,
+                                       const string &tagId) {
+    SegmentsWithTotalCount res;
+    res.mData.reserve(pageSize);
     queryOption options;
     // set sort order
     switch (sortBy) {
     case SortOrder::lastModified:
-        // timestamp, the larger, the nearer
+        // timestamp, new->old
         options.sort(streamDocument{} << CodeSegment::KEY_LAST_MODIFIED << -1 << finalize);
         break;
     case SortOrder::favorNumber:
@@ -142,23 +141,30 @@ vector<CodeSegment> getCodeSegments(int32_t page, int32_t pageSize, SortOrder so
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
     // search all
-    // FIXME should be skip((page - 1) * pageSize)
+    int32_t skipNumber = (page - 1) * pageSize;
     if (tagId.empty()) {
-        auto cursor = collectionCodeSegment.find({}, options.skip(page - 1).limit(pageSize));
-        for (auto &&doc : cursor) {
-            res.emplace_back(toCodeSegment(doc));
+        // get total count
+        res.mCount = collectionCodeSegment.count_documents({});
+        if (skipNumber >= 0 && skipNumber < res.mCount) {
+            auto cursor = collectionCodeSegment.find({}, options.skip(skipNumber).limit(pageSize));
+            for (auto &&doc : cursor) {
+                res.mData.emplace_back(toCodeSegment(doc));
+            }
         }
     }
     // search by tag
-    // FIXME need skip
     else {
-        auto cursor = collectionCodeSegment.find(
-            streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize, options);
-        for (auto &&doc : cursor) {
-            res.emplace_back(toCodeSegment(doc));
+        auto tmpFilter = streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize;
+        res.mCount = collectionCodeSegment.count_documents(tmpFilter.view());
+        if (skipNumber >= 0 && skipNumber < res.mCount) {
+            auto cursor = collectionCodeSegment.find(tmpFilter.view(),
+                                                     options.skip(skipNumber).limit(pageSize));
+            for (auto &&doc : cursor) {
+                res.mData.emplace_back(toCodeSegment(doc));
+            }
         }
     }
-    res.shrink_to_fit();
+    res.mData.shrink_to_fit();
     return res;
 }
 
@@ -174,71 +180,78 @@ std::optional<CodeSegment> findCodeSegmentByTitle(const string &title) {
     return res;
 }
 
-int32_t countCodeSegment(const string &tagId) {
-    static const string fieldName = "count";
-    int32_t res = 0;
-    // find tagId first
-    auto clientEntry = mongoClientEntry();
-    auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
-    // count code segment with tag
-    auto collectionCodeSegment =
-        mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-    pipeline pipe{};
-    if (!tagId.empty())
-        pipe.match(streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize);
-    pipe.count(fieldName);
-    auto cursor = collectionCodeSegment.aggregate(pipe);
-    auto iterator = cursor.begin();
-    if (iterator != cursor.end())
-        res = (*iterator)[fieldName].get_int32().value;
-    return res;
-}
+// int32_t countCodeSegment(const string &tagId) {
+//     static const string fieldName = "count";
+//     int32_t res = 0;
+//     // find tagId first
+//     auto clientEntry = mongoClientEntry();
+//     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
+//     // count code segment with tag
+//     auto collectionCodeSegment =
+//         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
+//     pipeline pipe{};
+//     if (!tagId.empty())
+//         pipe.match(streamDocument{} << CodeSegment::KEY_TAG_LIST << oid(tagId) << finalize);
+//     pipe.count(fieldName);
+//     auto cursor = collectionCodeSegment.aggregate(pipe);
+//     auto iterator = cursor.begin();
+//     if (iterator != cursor.end())
+//         res = (*iterator)[fieldName].get_int32().value;
+//     return res;
+// }
 
 bool updateCodeSegment(const CodeSegment &segment) {
+    if (segment.mId.empty())
+        return false;
     bool res = false;
-    if (!segment.mId.empty()) {
-        auto clientEntry = mongoClientEntry();
-        auto collectionCodeSegment =
-            mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-        try {
-            auto replaceRes = collectionCodeSegment.replace_one(
-                streamDocument{} << CodeSegment::KEY_ID << oid(segment.mId) << finalize,
-                toBsonDoc(segment));
-            res = replaceRes.has_value() && replaceRes.value().matched_count() == 1;
-        } catch (const mongocxx::exception &e) {
-            if (e.code().value() != mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
-                throw;
-        } catch (const bsoncxx::exception &e) {
-            if (e.code() != bsoncxx::error_code::k_invalid_oid)
-                throw;
-        }
+    auto clientEntry = mongoClientEntry();
+    auto collectionCodeSegment =
+        mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
+    try {
+        auto replaceRes = collectionCodeSegment.replace_one(
+            streamDocument{} << CodeSegment::KEY_ID << oid(segment.mId) << finalize,
+            toBsonDoc(segment));
+        res = replaceRes.has_value() && replaceRes.value().matched_count() == 1;
+    } catch (const mongocxx::exception &e) {
+        if (e.code().value() != mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
+            throw;
     }
     return res;
 }
 
-// bool removeTagOfCodeSegment(const string &segmentId, const string &tagId) {
-//     auto clientEntry = mongoClientEntry();
-//     auto collectionCodeSegment =
-//         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-//     auto updateRes = collectionCodeSegment.update_one(
-//         streamDocument{} << CodeSegment::KEY_ID << oid(segmentId) << finalize,
-//         streamDocument{} << "$pull" << open_document << CodeSegment::KEY_TAG_LIST << oid(tagId)
-//                          << close_document << finalize);
-//     return updateRes.has_value() && updateRes.value().modified_count() == 1;
-// }
-
-std::optional<string> addTag(const Tag &tag) {
+std::optional<string> addTag(const string &tag) {
+    std::optional<string> res;
+    if (tag.empty())
+        return res;
+    string lowerTag = tag;
+    for (size_t i = 0; i < tag.size(); i++)
+        lowerTag[i] = std::tolower(lowerTag[i]);
     auto clientEntry = mongoClientEntry();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
-    std::optional<string> res;
-    try {
-        auto insertRes = collectionTag.insert_one(toBsonDoc(tag));
-        if (insertRes) {
-            res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
+    // do find and then insert
+
+    auto findRes = collectionTag.find_one(
+        // use regex to ignore case,
+        streamDocument{} << Tag::KEY_VALUE << lowerTag << finalize);
+    if (findRes.has_value()) {
+        res.emplace(toTag(findRes.value().view()).mId);
+    } else {
+        try {
+            auto insertRes = collectionTag.insert_one(toBsonDoc(Tag{lowerTag}));
+            if (insertRes.has_value()) {
+                res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
+            }
+        } catch (const mongocxx::exception &e) {
+            if (e.code().value() == mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
+                res.emplace(
+                    toTag(collectionTag
+                              .find_one(streamDocument{} << Tag::KEY_VALUE << lowerTag << finalize)
+                              .value()
+                              .view())
+                        .mId);
+            else
+                throw;
         }
-    } catch (const mongocxx::operation_exception &e) {
-        if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
-            throw;
     }
     return res;
 }
@@ -254,8 +267,6 @@ vector<Tag> getTags() {
     return res;
 }
 
-// todo consider better return value
-
 std::optional<string> addUser(const User &user) {
     std::optional<string> res;
     auto clientEntry = mongoClientEntry();
@@ -265,6 +276,7 @@ std::optional<string> addUser(const User &user) {
         if (insertRes.has_value())
             res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
     } catch (const mongocxx::operation_exception &e) {
+        // may need to use better return value instead capture it
         if (e.code().value() != MONGOC_ERROR_DUPLICATE_KEY)
             throw;
     }
@@ -319,15 +331,15 @@ bool favor(const string &userId, const string &codeSegmentId) {
     return res;
 }
 
-vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pageSize) {
-    vector<CodeSegment> res;
-    res.reserve(pageSize);
+SegmentsWithTotalCount getUserFavors(const string &userId, int32_t page, int32_t pageSize) {
+    SegmentsWithTotalCount res;
+    res.mData.reserve(pageSize);
     auto favorsIds = getUserFavorsIds(userId);
-    int32_t startPos = (page - 1) * pageSize;
-    if (favorsIds.size() > (size_t)(startPos)) {
+    int32_t skipNum = (page - 1) * pageSize;
+    if ((size_t)(skipNum) < favorsIds.size()) {
         auto arrayBuilder = basicArray{};
-        for (int32_t i = 0; i < pageSize && (size_t)(i + startPos) < favorsIds.size(); i++) {
-            arrayBuilder.append(oid(favorsIds[i + startPos]));
+        for (int32_t i = 0; i < pageSize && (size_t)(i + skipNum) < favorsIds.size(); i++) {
+            arrayBuilder.append(oid(favorsIds[i + skipNum]));
         }
         auto tmpDoc = basicDocument{};
         tmpDoc.append(kvp("$in", arrayBuilder));
@@ -339,10 +351,11 @@ vector<CodeSegment> getUserFavors(const string &userId, int32_t page, int32_t pa
             mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
         auto cursor = collectionCodeSegments.find(filter.extract());
         for (auto &&doc : cursor) {
-            res.emplace_back(toCodeSegment(doc));
+            res.mData.emplace_back(toCodeSegment(doc));
         }
+        res.mCount = (int32_t)favorsIds.size();
     }
-    res.shrink_to_fit();
+    res.mData.shrink_to_fit();
     return res;
 }
 
