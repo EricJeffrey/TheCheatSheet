@@ -8,7 +8,7 @@
 #include "EsContext.hpp"
 #include "nlohmann/json.hpp"
 
-using HttpError = httplib::Error;
+using HttplibError = httplib::Error;
 using HttpClient = httplib::Client;
 using HttpParams = httplib::Params;
 using HttpHeaders = httplib::Headers;
@@ -24,7 +24,7 @@ std::optional<string> addCodeSegment(const CodeSegment &segment) {
     auto resp = client.Post((slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc").c_str(),
                             segmentJson.dump(), CONTENT_TYPE_JSON().c_str());
     std::optional<string> res;
-    if (resp.error() == HttpError::Success) {
+    if (resp.error() == HttplibError::Success) {
         auto respJson = NlohmannJson::parse(resp.value().body);
         if (!respJson.contains("error") && respJson.contains("result"))
             res.emplace(respJson["_id"].dump());
@@ -42,7 +42,7 @@ bool updateCodeSegment(const CodeSegment &segment) {
             (slash + EsContext::INDEX_CODE_SEGMENT + slash + "_doc" + slash + segment.mEsId)
                 .c_str(),
             segmentJson.dump(), CONTENT_TYPE_JSON().c_str());
-        if (resp.error() == HttpError::Success) {
+        if (resp.error() == HttplibError::Success) {
             auto respJson = NlohmannJson::parse(resp.value().body);
             if (!respJson.contains("error") && respJson.contains("result"))
                 res = true;
@@ -73,7 +73,7 @@ vector<CodeSegment> search(const string &text, int32_t page, int32_t pagesSize) 
             .dump();
     auto resp = client.send(request);
 
-    if (resp.error() == HttpError::Success) {
+    if (resp.error() == HttplibError::Success) {
         auto respJson = NlohmannJson::parse(resp.value().body);
         if (!respJson.contains("error")) {
             int num = respJson["hits"]["total"]["value"].get<int32_t>();
@@ -93,16 +93,24 @@ vector<CodeSegment> search(const string &text, int32_t page, int32_t pagesSize) 
 
 bool createIndex() {
     httplib::Client client{EsContext::HOST, EsContext::port};
-    auto resp =
-        client.Put((slash + EsContext::INDEX_CODE_SEGMENT).c_str(),
-                   EsContext::INDEX_MAPPING_CODE_SEGMENT().c_str(), CONTENT_TYPE_JSON().c_str());
     bool res = false;
-    if (resp.error() == HttpError::Success) {
-        auto respJson = NlohmannJson::parse(resp.value().body);
-        // acknowledged will be false if timed-out, so just check error
-        if (!respJson.contains("error"))
+    auto existResult = client.Get((slash + EsContext::INDEX_CODE_SEGMENT).c_str());
+    if (existResult.error() == HttplibError::Success) {
+        auto respJson = NlohmannJson::parse(existResult.value().body);
+        // index already exist
+        if (!respJson.contains("error")) {
             res = true;
-        Logger()->debug("create elasticsearch index result: {}", respJson.dump());
+        } else {
+            auto putIndexRes = client.Put((slash + EsContext::INDEX_CODE_SEGMENT).c_str(),
+                                          EsContext::INDEX_MAPPING_CODE_SEGMENT().c_str(),
+                                          CONTENT_TYPE_JSON().c_str());
+            if (putIndexRes.error() == HttplibError::Success) {
+                respJson = NlohmannJson::parse(putIndexRes.value().body);
+                // acknowledged will be false if timed-out, so just check error
+                if (!respJson.contains("error"))
+                    res = true;
+            }
+        }
     }
     return res;
 }

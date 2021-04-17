@@ -87,7 +87,7 @@ var tester = {
         });
         for (let i = 1; i < 23; i++) {
             const ii = i;
-            await testNext(9 + i * 0.1, PATH_ADD_CODE_SEGMENT, doPost, {
+            await testNext(9 + i * 0.01, PATH_ADD_CODE_SEGMENT, doPost, {
                 codeSegment: {
                     title: " actuall with title" + randStr() + "--" + ii,
                     description: "description with " + randStr(),

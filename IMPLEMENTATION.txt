@@ -20,7 +20,6 @@ NoSQL数据库实体
         lastModified    - 最后修改时间 ms
         favorNumber     - 点赞数
         tagList         - 标签列表
-todo 标签列表包含值而不是id
     标签
         value           - 标签值，不区分大小写
 
@@ -40,7 +39,7 @@ todo 标签列表包含值而不是id
         查看某个代码段
         复制代码段内容
         点赞代码段 - 通过cookie获取用户标识
-    搜索代码段
+    搜索代码段 - 分页固定，每页的数目由客户端决定
     编辑操作 - lastModified、createdAt字段由客户端设置
         新增代码段 - 代码段标题不可重复，先后添加到es和mongo，并设置esId
             新增tag - 客户端发起

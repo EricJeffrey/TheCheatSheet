@@ -2,10 +2,12 @@
 #define MONGO_HELPER_CC
 
 #include "MongoHelper.hpp"
+#include "../util/logger.hpp"
 
 #include <bsoncxx/exception/error_code.hpp>
 #include <bsoncxx/exception/exception.hpp>
 #include <bsoncxx/json.hpp>
+#include <bsoncxx/types/value.hpp>
 #include <mongoc/mongoc.h>
 #include <mongocxx/exception/operation_exception.hpp>
 
@@ -228,30 +230,17 @@ std::optional<string> addTag(const string &tag) {
         lowerTag[i] = std::tolower(lowerTag[i]);
     auto clientEntry = mongoClientEntry();
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
-    // do find and then insert
-
-    auto findRes = collectionTag.find_one(
-        // use regex to ignore case,
-        streamDocument{} << Tag::KEY_VALUE << lowerTag << finalize);
+    // do find_and_insert in one go
+    auto findRes = collectionTag.find_one_and_update(
+        streamDocument{} << Tag::KEY_VALUE << open_document << "$regex"
+                         << bsoncxx::types::value{bsoncxx::types::b_regex{"^" + tag, "i"}}
+                         << close_document << finalize,
+        streamDocument{} << "$set" << open_document << Tag::KEY_VALUE << tag << close_document
+                         << finalize,
+        mongocxx::options::find_one_and_update{}.upsert(true).return_document(
+            mongocxx::options::return_document::k_after));
     if (findRes.has_value()) {
-        res.emplace(toTag(findRes.value().view()).mId);
-    } else {
-        try {
-            auto insertRes = collectionTag.insert_one(toBsonDoc(Tag{lowerTag}));
-            if (insertRes.has_value()) {
-                res.emplace(insertRes.value().inserted_id().get_oid().value.to_string());
-            }
-        } catch (const mongocxx::exception &e) {
-            if (e.code().value() == mongoc_error_code_t::MONGOC_ERROR_DUPLICATE_KEY)
-                res.emplace(
-                    toTag(collectionTag
-                              .find_one(streamDocument{} << Tag::KEY_VALUE << lowerTag << finalize)
-                              .value()
-                              .view())
-                        .mId);
-            else
-                throw;
-        }
+        res.emplace(findRes.value().view()["_id"].get_oid().value.to_string());
     }
     return res;
 }
@@ -373,29 +362,41 @@ vector<string> getUserFavorsIds(const string &userId) {
 // int32_t countUserFavors(const string &userId) { return getUserFavorsIds(userId).size(); }
 
 bool mongoIndexInit() {
+    string KEY_UNIQUE = "unique";
+    auto indexExist = [&KEY_UNIQUE](mongocxx::collection &collection, const string &key) {
+        bool exist = false;
+        for (auto &&v : collection.list_indexes()) {
+            if (v.find(KEY_UNIQUE) != v.end() && v[KEY_UNIQUE].get_bool().value) {
+                auto tmpKeys = v["key"].get_document().view();
+                if (tmpKeys.find(key) != tmpKeys.end() && tmpKeys[key].get_int32() == 1) {
+                    exist = true;
+                    break;
+                }
+            }
+        }
+        return exist;
+    };
+    auto createUniqueIndex = [&KEY_UNIQUE](mongocxx::collection &collection, const string &key) {
+        auto tmpRes = collection.create_index(streamDocument{} << key << 1 << finalize,
+                                              streamDocument{} << KEY_UNIQUE << true << finalize);
+        auto createRes = tmpRes.view();
+        if (createRes.find("name") != createRes.end())
+            return !createRes["name"].get_utf8().value.empty();
+        return false;
+    };
+
     auto clientEntry = mongoClientEntry();
     auto collectionUser = mongoCollection(clientEntry, MongoContext::COLLECTION_USER);
     auto collectionTag = mongoCollection(clientEntry, MongoContext::COLLECTION_TAG);
     auto collectionCodeSegment =
         mongoCollection(clientEntry, MongoContext::COLLECTION_CODE_SEGMENT);
-    bool res = !collectionUser
-                    .create_index(streamDocument{} << User::KEY_EMAIL << 1 << finalize,
-                                  streamDocument{} << "unique" << true << finalize)
-                    .view()["name"]
-                    .get_utf8()
-                    .value.empty() &&
-               !collectionTag
-                    .create_index(streamDocument{} << Tag::KEY_VALUE << 1 << finalize,
-                                  streamDocument{} << "unique" << true << finalize)
-                    .view()["name"]
-                    .get_utf8()
-                    .value.empty() &&
-               !collectionCodeSegment
-                    .create_index(streamDocument{} << CodeSegment::KEY_TITLE << 1 << finalize,
-                                  streamDocument{} << "unique" << true << finalize)
-                    .view()["name"]
-                    .get_utf8()
-                    .value.empty();
+    bool res = true;
+    res = res && (indexExist(collectionUser, User::KEY_EMAIL) ||
+                  createUniqueIndex(collectionUser, User::KEY_EMAIL));
+    res = res && (indexExist(collectionTag, Tag::KEY_VALUE) ||
+                  createUniqueIndex(collectionTag, Tag::KEY_VALUE));
+    res = res && (indexExist(collectionCodeSegment, CodeSegment::KEY_TITLE) ||
+                  createUniqueIndex(collectionCodeSegment, CodeSegment::KEY_TITLE));
     return res;
 }
 } // namespace mongohelper
