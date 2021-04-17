@@ -30,7 +30,7 @@
 ## 运行后端
 
 0. MongoDB:4.0和Elasticsearch:7.9.2，可以使用docker运行容器，Elasticsearch需要安装中文分词工具并重启，参加[ESTIPS](../ESTIPS.MD).
-1. 启动MongoDB，挂载外部数据库文件: `docker run -d --name -v cheatsheet_mongo /data/cheatsheet/mongo:/data/db mongo:4.0`
+1. 启动MongoDB，挂载外部数据库文件: `docker run -d --name cheatsheet_mongo -v /data/cheatsheet/mongo:/data/db mongo:4.0`
 2. Elasticsearch
    1. 启动并挂载外部数据 `docker run -d --name cheatsheet_es -v /data/cheatsheet/elasticsearch:/usr/share/elasticsearch/data -e "discovery.type=single-node" docker.elastic.co/elasticsearch/elasticsearch:7.9.2`
    2. 安装中文分词插件 `docker exec -it cheatsheet_es /usr/share/elasticsearch/bin/elasticsearch-plugin install https://github.com/medcl/elasticsearch-analysis-ik/releases/download/v7.9.2/elasticsearch-analysis-ik-7.9.2.zip`
@@ -63,4 +63,3 @@ rm -f /data/cheatsheet/cheatsheet_backend.log # remove old log
 - [error code of the mongodb driver](https://github.com/mongodb/mongo-c-driver/blob/master/src/libmongoc/src/mongoc/mongoc-error.h)
 
 todo detect memory leak on JMeter testing
-todo add some_cheatsheets.json to database
