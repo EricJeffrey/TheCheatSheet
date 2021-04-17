@@ -8,10 +8,8 @@
     <title>Document</title>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <!-- 引入样式 -->
-    <link rel="stylesheet" href="https://unpkg.com/element-ui/lib/theme-chalk/index.css">
-    <!-- 引入组件库 -->
-    <script src="https://unpkg.com/element-ui/lib/index.js"></script>
+    <!-- 生产环境版本 -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
     <style>
         body,
         html {
@@ -20,193 +18,381 @@
             background-color: whitesmoke;
         }
 
-        .el-row {
-            margin-bottom: 20px;
+        input,
+        textarea {
+            padding: 5px;
+            margin-bottom: 5px;
+            font-size: medium;
+            font-family: Consolas, "等线", '微软雅黑';
         }
 
-        .el-row:last-child {
-            margin-bottom: 0;
+        input:last-child,
+        textarea:last-child {
+            margin-bottom: 0px;
+        }
+
+        ul {
+            margin: 0px;
+            padding: 0px;
+        }
+
+        li {
+            display: block;
+
+        }
+
+
+
+        .flexRow {
+            display: flex;
+            flex-direction: row;
+        }
+
+        .flexCol {
+            display: flex;
+            flex-direction: column;
+        }
+
+        #copyHelperInput {
+            position: absolute;
+            opacity: 0;
+        }
+
+        #notifyHelperDiv {
+            padding: 10px 25px;
+            background-color: white;
+            box-shadow: lightgray 1px 1px 16px;
+            border-radius: 5px;
+            color: #039aff;
+            transition: all 200ms ease;
+            position: absolute;
+            margin-left: auto;
+            margin-right: 10px;
+            width: fit-content;
+            float: right;
+            right: 0;
+            text-align: center;
+            top: 20px;
+            opacity: 0;
+        }
+
+
+        #app {
+            width: 80%;
+            margin: auto;
+            display: flex;
+        }
+
+        #header {
+            padding: 10px;
+        }
+
+        #logo {
+            font-size: xx-large;
+            font-family: 'Lucida Calligraphy', Consolas, '等线';
+            font-weight: bold;
+            color: rgb(29, 124, 108);
+            text-shadow: rgb(55, 189, 93) 1px 1px 1px;
+            cursor: pointer;
+        }
+
+
+        .labelDiv {
+            font-size: x-large;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        #searchHolderDiv,
+        #addSegmentDiv {
+            flex: 1;
+            padding: 10px;
+            max-width: 50%;
+        }
+
+        .searchResultDiv {
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        .searchResultNoDataDiv {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .segmentCardDiv {
+            transition: all ease 300ms;
+            margin-bottom: 10px;
+            padding: 15px;
+            box-shadow: darkgray 1px 1px 6px;
+            border-radius: 5px;
+            margin-top: 10px;
+            background-color: white;
+        }
+
+        .segmentCardDiv:hover {
+            box-shadow: darkgray 1px 1px 16px;
+
+        }
+
+        .segmentCardDiv:last-child {
+            margin-bottom: 0px;
+        }
+
+        .segmentCardDiv>div {
+            margin-bottom: 10px;
+        }
+
+        .segmentTitleDiv {
+            font-weight: bold;
+        }
+
+        .segmentContentDiv {
+            overflow-x: auto;
+            padding: 3px;
+            border: solid rgba(65, 96, 105, 0.425) 1px;
+            border-radius: 5px;
+        }
+
+        pre {
+            margin: 3px;
+        }
+
+        .segmentContentCode {
+            font-family: Consolas, '等线';
+            font-size: medium;
+        }
+
+        .segmentTagDiv {
+            border-radius: 10px;
+            padding: 5px;
+            border: lightgray 1px solid;
+            margin-right: 10px;
+            cursor: pointer;
+        }
+
+        .segmentTagDiv:last-child {
+            margin-right: 0px;
+        }
+
+        .doCopySpan {
+            cursor: pointer;
+            text-decoration: underline;
+            font-size: small;
+            color: cornflowerblue;
+            flex-grow: 1;
+            text-align: end;
         }
     </style>
 
     <script>
-        window.onload = function () {
-            var app = new Vue({
-                el: "#app"
-            })
+        const CODE_SUCCESS = 100;
+        function showNotify(content) {
+            var notifyHelper = document.getElementById("notifyHelperDiv");
+            notifyHelper.innerText = content;
+            notifyHelper.style.opacity = 1;
+            setTimeout(() => {
+                notifyHelper.style.opacity = 0;
+            }, 2500);
+        }
+
+        function regAndLogin(whatToDo) {
+            async function job() {
+                await (await fetch("/register", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        email: "xxx@xxx.com",
+                        name: "jeffrey",
+                        password: "123"
+                    })
+                })).json();
+                var loginRes = await (await fetch("/login", {
+                    method: "POST",
+                    body: JSON.stringify({
+                        email: "xxx@xxx.com",
+                        password: "123"
+                    })
+                })).json();
+
+                if (loginRes["code"] != CODE_SUCCESS)
+                    throw "登录失败: " + loginRes["errorMsg"];
+            }
+
+            if (document.cookie.indexOf("uid") == -1) {
+                job().then(() => {
+                    whatToDo();
+                }).catch(() => {
+                    showNotify("登录失败");
+                });
+            } else {
+                whatToDo();
+            }
+        }
+
+        function clearAddSegmentContent() {
+            document.getElementById("titleInput").value = "";
+            document.getElementById("descTextArea").value = "";
+            document.getElementById("contentTextArea").value = "";
+            document.getElementById("tagsInput").value = "";
         }
     </script>
 </head>
 
 <body>
-
-    <div id="app">
-        <el-container>
-            <el-aside>
-                <!-- logo -->
-                <el-row>
-                    <el-col>CheatSheet</el-col>
-                </el-row>
-                <!-- tags -->
-                <el-row>
-                    <el-col>标签</el-col>
-                    <el-col>
-                        <div>
-                            <el-link>linux</el-link>
-                            <el-link>bash</el-link>
-                            <el-link>Java</el-link>
-                            <el-link>python</el-link>
-                            <el-link>C++</el-link>
-                            <el-link>MySQL</el-link>
-                            <el-link>Windows</el-link>
-                            <el-link>Elasticsearch</el-link>
+    <input id="copyHelperInput"></input>
+    <div id="notifyHelperDiv"></div>
+    <div id="app" class="flexCol">
+        <div id="header" class="flexRow">
+            <div id="logo">TheCheatsheet - 搜索 复制 粘贴！</div>
+        </div>
+        <div id="main" class="flexRow">
+            <div id="searchHolderDiv" class="flexCol">
+                <div class="labelDiv">搜索代码段</div>
+                <input type="text" name="search" id="searchInput" placeholder="(•_•)" v-on:keyup.enter="doSearch">
+                <div class="flexCol" id="searchResultDiv">
+                    <div class="searchResultNoDataDiv" v-if="searchResult.segments.length == 0"> 没有数据 ⊙﹏⊙ </div>
+                    <div class="segmentCardDiv flexCol" v-for="item in searchResult.segments">
+                        <div class="segmentCardHeaderDiv flexRow">
+                            <div class="segmentTitleDiv"> {{item.title}} </div>
+                            <span class="doCopySpan" v-on:click="doCopy(item.content)">复制</span>
                         </div>
-                    </el-col>
-                </el-row>
-                <el-button>Github</el-button>
-            </el-aside>
-            <el-container>
-                <!-- 搜索框与头像 -->
-                <el-header>
-                    <el-row type="flex" justify="end" :gutter="10">
-                        <span>
-                            <el-input v-model="input" placeholder="请输入内容" prefix-icon="el-icon-search">
-                            </el-input>
-                        </span>
-                        <span>
-                            <el-button>新增</el-button>
-                        </span>
-                        <span>
-                            <el-dropdown>
-                                <el-avatar icon="el-icon-user-solid"></el-avatar>
-                                <el-dropdown-menu slot="dropdown">
-                                    <el-dropdown-item >
-                                        <el-link href="">个人中心</el-link>
-                                    </el-dropdown-item>
-                                    <el-dropdown-item>登出</el-dropdown-item>
-                                </el-dropdown-menu>
-                            </el-dropdown>
-                        </span>
-                    </el-row>
-                </el-header>
-                <!-- 代码段数据主体 -->
-                <el-main>
-                    <el-row type="flex" gutter="10">
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                    </el-row>
-                    <el-row type="flex" gutter="10">
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                        <el-col :span="6">
-                            <el-card shadow="hover">
-                                <div>标题</div>
-                                <div>代码段描述</div>
-                                <div>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                    代码段内容<br>
-                                </div>
-                                <div>
-                                    <el-button type="text">点赞</el-button>
-                                    <div style="display: flex; float: right;">
-                                        <el-button type="text">编辑</el-button>
-                                        <el-button type="text">复制</el-button>
-                                    </div>
-                                </div>
-                            </el-card>
-                        </el-col>
-                    </el-row>
-                </el-main>
-            </el-container>
-        </el-container>
+                        <div class="segmentDescDiv"> {{searchResult.lfConvertedData(item.description)}} </div>
+                        <div class="segmentContentDiv">
+                            <code><pre class="segmentContentCode">{{item.content}}</pre></code>
+                        </div>
+                        <div class="segmentTagListDiv flexRow">
+                            <div class="segmentTagDiv" v-for="tag in item.tagList">
+                                {{tag}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="addSegmentDiv" class="flexCol">
+                <div class="labelDiv">添加代码段</div>
+                <input type="text" name="title" id="titleInput" placeholder="标题">
+                <textarea name="description" id="descTextArea" cols="30" rows="3" placeholder="描述"></textarea>
+                <textarea name="content" id="contentTextArea" cols="30" rows="10" placeholder="代码段内容"></textarea>
+                <input type="text" name="tags" id="tagsInput" placeholder="逗号分隔的标签，例: linux,python">
+                <button id="addSegmentButton" v-on:click="doAdd">添加</button>
+            </div>
+        </div>
     </div>
+    <script>
+        var app = new Vue({
+            el: "#app",
+            data: {
+                searchResult: {
+                    segments: [],
+                    lfConvertedData: function (data) {
+                        if (data)
+                            return data.replace('\n', '<br />');
+                        return "";
+                    },
+                },
+                doCopy: function (content) {
+                    /* navigator.clipboard.writeText(content); */
+                    var helperInput = document.getElementById("copyHelperInput");
+                    helperInput.value = content;
+                    helperInput.select();
+                    helperInput.setSelectionRange(0, 99999);
+                    document.execCommand("copy");
+                    showNotify("已复制");
+                },
+                doSearch: function () {
+                    var text = document.getElementById("searchInput").value.trim();
+                    if (text.length == 0) {
+                        showNotify("搜索文字不能为空");
+                    } else {
+                        fetch("/search?text=" + text).then(v => {
+                            if (v.ok) {
+                                v.json().then(vv => {
+                                    if (vv["code"] == CODE_SUCCESS)
+                                        this.searchResult.segments = vv["result"]["codeSegments"];
+                                    else showNotify("搜索失败: " + vv["errorMsg"]);
+                                })
+                            } else
+                                throw "失败";
+                        }).catch(() => { showNotify("搜索失败"); });
+                    }
+                },
+                doAdd: function () {
+                    console.log("doaddnow");
+                    /* note we are accessing dom here */
+                    var title = document.getElementById("titleInput").value.trim();
+                    var desc = document.getElementById("descTextArea").value.trim();
+                    var content = document.getElementById("contentTextArea").value.trim();
+                    var commaSeperatedTags = document.getElementById("tagsInput").value.trim();
+                    if (title.length == 0 || content.length == 0) {
+                        showNotify("标题和内容不能为空");
+                        return;
+                    }
+                    var tagList = [];
+                    if (commaSeperatedTags.length > 0) {
+                        const tmpList = commaSeperatedTags.split(',');
+                        for (let i = 0; i < tmpList.length; i++) {
+                            if (tmpList[i].trim().length > 0)
+                                tagList.push(tmpList[i].trim());
+                        }
+                    }
+                    const data = {
+                        title: title,
+                        description: desc,
+                        content: content,
+                        createdAt: Date.now(),
+                        lastModified: Date.now(),
+                        favorNumber: 0,
+                        tagList: tagList
+                    };
+                    regAndLogin(() => {
+                        fetch("/addCodeSegment", { method: "POST", body: JSON.stringify({ codeSegment: data }) })
+                            .then(v => {
+                                if (v.ok) {
+                                    v.json().then(vv => {
+                                        if (vv["code"] == CODE_SUCCESS) {
+                                            showNotify("添加成功");
+                                            clearAddSegmentContent();
+                                        }
+                                        else { showNotify("添加失败: " + vv["errorMsg"]) };
+                                    });
+                                } else { showNotify("添加失败"); }
+                            })
+                            .catch((v) => {
+                                showNotify("添加失败，网络错误");
+                                console.log(v);
+                            });
+                    });
+                }
+            },
+            created: function () {
+                fetch("/getCodeSegments?pageSize=20")
+                    .then(v => {
+                        if (v.ok) {
+                            v.json().then(vv => {
+                                if (vv["code"] == CODE_SUCCESS) { this.searchResult.segments = vv["result"]["codeSegments"]; }
+                                else { showNotify("获取数据失败: " + vv["errorMsg"]); }
+                            });
+                        } else {
+                            showNotify("获取数据失败");
+                        }
+                    }).catch(v => {
+                        showNotify("获取数据失败，网络错误");
+                    });
+            }
+        });
+
+    </script>
 </body>
 
 </html>
+
+<!-- 
+How to center a “position: absolute” element
+position: absolute;
+margin-left: auto;
+margin-right: auto;
+left: 0;
+right: 0;
+text-align: center;
+ -->

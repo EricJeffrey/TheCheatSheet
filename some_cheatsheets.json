@@ -27,7 +27,7 @@
     {
         "title": "linux查看主板型号、CPU信息",
         "description": "",
-        "content": "# 系统\\nuname -a               # 查看内核/操作系统/CPU信息\\ncpuinfo # or\\ncat /proc/cpuinfo      # 查看CPU信息\\n\\ndf -h                  # 查看各分区使用情况\\ndu -sh <目录名>        # 查看指定目录的大小\\n\\ndmesg | grep IDE       # 查看启动时IDE设备检测状况\\n\\n# 查看网卡型号\\nlspci | grep Ethernet  \\n\\n# 查看主板型号：\\ndmidecode | more\\n",
+        "content": "# 系统\nuname -a               # 查看内核/操作系统/CPU信息\ncpuinfo # or\ncat /proc/cpuinfo      # 查看CPU信息\n\ndf -h                  # 查看各分区使用情况\ndu -sh <目录名>        # 查看指定目录的大小\n\ndmesg | grep IDE       # 查看启动时IDE设备检测状况\n\n# 查看网卡型号\nlspci | grep Ethernet  \n\n# 查看主板型号：\ndmidecode | more\n",
         "tagList": [
             "Linux"
         ]
@@ -35,7 +35,7 @@
     {
         "title": "Linux跟踪进程系统调用",
         "description": "跟踪进程的系统调用情况",
-        "content": "# -ff follow fork & output separately, -s set string length\\n# -t show time, -x show non-ascii as hex\\nstrace -p pid -o filename -ff -s 1024 -t -x ",
+        "content": "# -ff follow fork & output separately, -s set string length\n# -t show time, -x show non-ascii as hex\nstrace -p pid -o filename -ff -s 1024 -t -x ",
         "tagList": [
             "Linux"
         ]
@@ -51,7 +51,7 @@
     {
         "title": "C++字符串转换为数值类型",
         "description": "stoi将字符串转换为数值类型， to_string 将其他类型转换为数值类型",
-        "content": "std::stoi, stof, stol(string)\\nstd::to_string(int)\\natoi(const char *)",
+        "content": "std::stoi, stof, stol(string)\nstd::to_string(int)\natoi(const char *)",
         "tagList": [
             "C++"
         ]
@@ -59,7 +59,7 @@
     {
         "title": "docker 外部访问 ",
         "description": "",
-        "content": "# ExecStart=... 后加 -H tcp://0.0.0.0:port\\nvim /usr/lib/systemd/system/docker.service # 或者是系统lib里\\nvim /lib/systemd/system/docker.service  ",
+        "content": "# ExecStart=... 后加 -H tcp://0.0.0.0:port\nvim /usr/lib/systemd/system/docker.service # 或者是系统lib里\nvim /lib/systemd/system/docker.service  ",
         "tagList": [
             "Linux"
         ]
@@ -75,7 +75,7 @@
     {
         "title": "Linux修改终端只显示当前路径文件夹名",
         "description": "通过改变bash的$PS1环境变量修改路径名，使终端只显示当前文件夹名不显示全部路径",
-        "content": "# 修改 .bashrc 文件中 PS1 变量里的 \\w 为 \\W ，如\\nPS1='${debian_chroot:+($debian_chroot)}\\u@\\h:\\W\\$ '\\n# PS内置转义说明\\n\\a            ASCII 响铃字符（也能够键入 \\007）   \\n\\d            \"Wed Sep 06\" 格式的日期    \\n\\e            ASCII 转义字符（也能够键入 \\033）   \\n\\h            主机名的第一部分（如 \"mybox\"）   \\n\\H            主机的全称（如 \"mybox.mydomain.com\"）   \\n\\j            在此shell中通过按 ^Z 挂起的进程数  \\n\\l            此 shell 的终端设备名（如 \"ttyp4\"）   \\n\\n            换行符  \\n\\r            回车符  \\n\\s            shell 的名称（如 \"bash\"）   \\n\\t            24 小时制时间（如 \"23:01:01\"）   \\n\\T            12 小时制时间（如 \"11:01:01\"）   \\n\\@            带有 am/pm 的 12 小时制时间   \\n\\u            username   \\n\\v            bash 的版本号（如 2.04）   \\n\\V            Bash 版本号（包含补丁级别）  \\n\\w            当前工作文件夹（如 \"/home/drobbins\"）   \\n\\W            当前工作文件夹的“基名 (basename)”（如 \"drobbins\"）   \\n\\!            当前命令在历史缓冲区中的位置   \\n\\#            命令编号（仅仅要您键入内容，它就会在每次提示时累加）   \\n\\$            假设您不是超级用户 (root)。则插入一个 \"$\"；假设您是超级用户。则显示一个 \"#\"  \\n\\xxx            插入一个用三位数 xxx（用零取代未使用的数字，如 \"\\007\"）表示的 ASCII 字符  \\n\\\\            反斜杠  \\n\\[            这个序列应该出如今不移动光标的字符序列（如颜色转义序列）之前。它使 bash 可以正确计算自己主动换行。\\n\\]            这个序列应该出如今非打印字符序列之后。 ",
+        "content": "# 修改 .bashrc 文件中 PS1 变量里的 \\w 为 \\W ，如\nPS1='${debian_chroot:+($debian_chroot)}\\u@\\h:\\W\\$ '\n# PS内置转义说明\n\\a            ASCII 响铃字符（也能够键入 \\007）   \n\\d            \"Wed Sep 06\" 格式的日期    \n\\e            ASCII 转义字符（也能够键入 \\033）   \n\\h            主机名的第一部分（如 \"mybox\"）   \n\\H            主机的全称（如 \"mybox.mydomain.com\"）   \n\\j            在此shell中通过按 ^Z 挂起的进程数  \n\\l            此 shell 的终端设备名（如 \"ttyp4\"）   \n\\n            换行符  \n\\r            回车符  \n\\s            shell 的名称（如 \"bash\"）   \n\\t            24 小时制时间（如 \"23:01:01\"）   \n\\T            12 小时制时间（如 \"11:01:01\"）   \n\\@            带有 am/pm 的 12 小时制时间   \n\\u            username   \n\\v            bash 的版本号（如 2.04）   \n\\V            Bash 版本号（包含补丁级别）  \n\\w            当前工作文件夹（如 \"/home/drobbins\"）   \n\\W            当前工作文件夹的“基名 (basename)”（如 \"drobbins\"）   \n\\!            当前命令在历史缓冲区中的位置   \n\\#            命令编号（仅仅要您键入内容，它就会在每次提示时累加）   \n\\$            假设您不是超级用户 (root)。则插入一个 \"$\"；假设您是超级用户。则显示一个 \"#\"  \n\\xxx            插入一个用三位数 xxx（用零取代未使用的数字，如 \"\\007\"）表示的 ASCII 字符  \n\\\\            反斜杠  \n\\[            这个序列应该出如今不移动光标的字符序列（如颜色转义序列）之前。它使 bash 可以正确计算自己主动换行。\n\\]            这个序列应该出如今非打印字符序列之后。 ",
         "tagList": [
             "Linux"
         ]
@@ -83,7 +83,7 @@
     {
         "title": "Git设置代理",
         "description": "Git设置代理，不过Windows似乎不支持。Linux也下可以使用 export http_proxy=http://address export https_proxy=... 实现全局代理",
-        "content": "git config --global https.proxy [http://127.0.0.1:1080](http://127.0.0.1:1080/) \\n// or\\ngit config --global https.proxy [https://127.0.0.1:1080](https://127.0.0.1:1080/)\\n\\ngit config --global --unset http.proxy\\ngit config --global --unset https.proxy",
+        "content": "git config --global https.proxy [http://127.0.0.1:1080](http://127.0.0.1:1080/) \n// or\ngit config --global https.proxy [https://127.0.0.1:1080](https://127.0.0.1:1080/)\n\ngit config --global --unset http.proxy\ngit config --global --unset https.proxy",
         "tagList": [
             "Text"
         ]
@@ -91,7 +91,7 @@
     {
         "title": "Linux终端raw模式下部分控制字符ascii码",
         "description": "终端raw模式下，使用read读取到的一些空字符的ascii码，单独的ctrl不会产生输入(ssh访问时)，数字均为10进制",
-        "content": "↑ 27 91 65\\n↓ 27 91 66\\n← 27 91 68\\n→ 27 91 67\\nctrl+c 3\\nesc 27",
+        "content": "↑ 27 91 65\n↓ 27 91 66\n← 27 91 68\n→ 27 91 67\nctrl+c 3\nesc 27",
         "tagList": [
             "Linux"
         ]
@@ -99,7 +99,7 @@
     {
         "title": "C++字符串trim",
         "description": "",
-        "content": "#include <algorithm> \\n#include <cctype>\\n#include <locale>\\n\\n// trim from start (in place)\\nstatic inline void ltrim(std::string &s) {\\n    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {\\n        return !std::isspace(ch);\\n    }));\\n}\\n\\n// trim from end (in place)\\nstatic inline void rtrim(std::string &s) {\\n    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {\\n        return !std::isspace(ch);\\n    }).base(), s.end());\\n}\\n\\n// trim from both ends (in place)\\nstatic inline void trim(std::string &s) {\\n    ltrim(s);\\n    rtrim(s);\\n}\\n\\n// trim from start (copying)\\nstatic inline std::string ltrim_copy(std::string s) {\\n    ltrim(s);\\n    return s;\\n}\\n\\n// trim from end (copying)\\nstatic inline std::string rtrim_copy(std::string s) {\\n    rtrim(s);\\n    return s;\\n}\\n\\n// trim from both ends (copying)\\nstatic inline std::string trim_copy(std::string s) {\\n    trim(s);\\n    return s;\\n}",
+        "content": "#include <algorithm> \n#include <cctype>\n#include <locale>\n\n// trim from start (in place)\nstatic inline void ltrim(std::string &s) {\n    s.erase(s.begin(), std::find_if(s.begin(), s.end(), [](unsigned char ch) {\n        return !std::isspace(ch);\n    }));\n}\n\n// trim from end (in place)\nstatic inline void rtrim(std::string &s) {\n    s.erase(std::find_if(s.rbegin(), s.rend(), [](unsigned char ch) {\n        return !std::isspace(ch);\n    }).base(), s.end());\n}\n\n// trim from both ends (in place)\nstatic inline void trim(std::string &s) {\n    ltrim(s);\n    rtrim(s);\n}\n\n// trim from start (copying)\nstatic inline std::string ltrim_copy(std::string s) {\n    ltrim(s);\n    return s;\n}\n\n// trim from end (copying)\nstatic inline std::string rtrim_copy(std::string s) {\n    rtrim(s);\n    return s;\n}\n\n// trim from both ends (copying)\nstatic inline std::string trim_copy(std::string s) {\n    trim(s);\n    return s;\n}",
         "tagList": [
             "C++"
         ]
@@ -107,7 +107,7 @@
     {
         "title": "C++随机数生成",
         "description": "",
-        "content": "std::random_device rd;\\nstd::mt19937 generator(rd());\\nstatic std::uniform_int_distribution<int> distribution(0, 61); // all included [a, b]\\nint x = distribution(generator); // x is the random number",
+        "content": "std::random_device rd;\nstd::mt19937 generator(rd());\nstatic std::uniform_int_distribution<int> distribution(0, 61); // all included [a, b]\nint x = distribution(generator); // x is the random number",
         "tagList": [
             "C++"
         ]
@@ -115,7 +115,7 @@
     {
         "title": "C++将文件内容输入到字符串",
         "description": "",
-        "content": "std::ifstream filestream(\"path/to/file\");\\nstring content((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());",
+        "content": "std::ifstream filestream(\"path/to/file\");\nstring content((std::istreambuf_iterator<char>(filestream)), std::istreambuf_iterator<char>());",
         "tagList": [
             "C++"
         ]
@@ -123,7 +123,7 @@
     {
         "title": "Linux 修改时区",
         "description": "修改时区，将环境变量添加到bashrc中并立即生效",
-        "content": "echo -e \"TZ='Asia/Shanghai' \\n export TZ\" >> ~/.bashrc && source ~/.bashrc # 或者如下\\nunlink /etc/localtime && sudo ln -s /usr/share/zoneinfo/Etc/GMT+8 /etc/localtime # 修改时区",
+        "content": "echo -e \"TZ='Asia/Shanghai' \n export TZ\" >> ~/.bashrc && source ~/.bashrc # 或者如下\nunlink /etc/localtime && sudo ln -s /usr/share/zoneinfo/Etc/GMT+8 /etc/localtime # 修改时区",
         "tagList": [
             "Linux"
         ]
@@ -139,7 +139,7 @@
     {
         "title": "Linux/C设置终端为raw模式",
         "description": "Linux下使用C语言设置终端为raw模式",
-        "content": "termios ttyOrigin;\\n\\n// reset using [atexit]\\nvoid ttyReset() {\\n    if (tcsetattr(STDIN_FILENO, TCSANOW, &ttyOrigin) == -1) {\\n        // error\\n    }\\n}\\n\\n// return -1 on error\\nint ttySetRaw(int fd, struct termios *prevTermios) {\\n    /* [tlpi](https://www.man7.org/tlpi/code/online/dist/tty/tty_functions.c.html#ttySetRaw) */\\n\\n    struct termios t;\\n    if (tcgetattr(fd, &t) == -1)\\n        return -1;\\n    if (prevTermios != NULL)\\n        *prevTermios = t;\\n    t.c_lflag &= ~(ICANON | ECHONL | ISIG | IEXTEN | ECHO);\\n    /* Noncanonical mode, disable signals, extended\\n       input processing, and echoing */\\n\\n    t.c_iflag &= ~(BRKINT | ICRNL | IGNBRK | IGNCR | INLCR | INPCK | ISTRIP | IXON | PARMRK);\\n    /* Disable special handling of CR, NL, and BREAK.\\n       No 8th-bit stripping or parity error handling.\\n       Disable START/STOP output flow control. */\\n\\n    t.c_cflag &= ~(CSIZE | PARENB);\\n    t.c_cflag &= ~(CS8);\\n\\n    t.c_oflag &= ~OPOST; /* Disable all output processing */\\n\\n    t.c_cc[VMIN] = 1;  /* Character-at-a-time input */\\n    t.c_cc[VTIME] = 0; /* with blocking */\\n    if (tcsetattr(fd, TCSAFLUSH, &t) == -1)\\n        return -1;\\n    return 0;\\n}",
+        "content": "termios ttyOrigin;\n\n// reset using [atexit]\nvoid ttyReset() {\n    if (tcsetattr(STDIN_FILENO, TCSANOW, &ttyOrigin) == -1) {\n        // error\n    }\n}\n\n// return -1 on error\nint ttySetRaw(int fd, struct termios *prevTermios) {\n    /* [tlpi](https://www.man7.org/tlpi/code/online/dist/tty/tty_functions.c.html#ttySetRaw) */\n\n    struct termios t;\n    if (tcgetattr(fd, &t) == -1)\n        return -1;\n    if (prevTermios != NULL)\n        *prevTermios = t;\n    t.c_lflag &= ~(ICANON | ECHONL | ISIG | IEXTEN | ECHO);\n    /* Noncanonical mode, disable signals, extended\n       input processing, and echoing */\n\n    t.c_iflag &= ~(BRKINT | ICRNL | IGNBRK | IGNCR | INLCR | INPCK | ISTRIP | IXON | PARMRK);\n    /* Disable special handling of CR, NL, and BREAK.\n       No 8th-bit stripping or parity error handling.\n       Disable START/STOP output flow control. */\n\n    t.c_cflag &= ~(CSIZE | PARENB);\n    t.c_cflag &= ~(CS8);\n\n    t.c_oflag &= ~OPOST; /* Disable all output processing */\n\n    t.c_cc[VMIN] = 1;  /* Character-at-a-time input */\n    t.c_cc[VTIME] = 0; /* with blocking */\n    if (tcsetattr(fd, TCSAFLUSH, &t) == -1)\n        return -1;\n    return 0;\n}",
         "tagList": [
             "C++"
         ]
@@ -147,7 +147,7 @@
     {
         "title": "C++时间戳与时间格式化",
         "description": "获取时间戳与格式化时间，格式化参数 https://en.cppreference.com/w/c/chrono/strftime",
-        "content": "// time since epoch in seconds\\nstd::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );\\n\\n// or in millisecond\\nauto timeSpan = chrono::high_resolution_clock::now() - chrono::time_point<chrono::high_resolution_clock>();\\nstd::chrono::duration_cast<std::chrono::milliseconds>(timeSpan).count();\\n\\n// or\\nchar buf[30] = {};\\ntime_t now = time(nullptr);\\nstrftime(buf, sizeof(buf), \"%F %T%Z\", gmtime(&now));\\n\\n// or\\nstring timet2Str(time_t time, const string &format = \"%F %R\") {\\n    std::stringstream ss;\\n    ss << std::put_time(std::localtime(&time), format.c_str());\\n    return ss.str();\\n}",
+        "content": "// time since epoch in seconds\nstd::chrono::system_clock::to_time_t( std::chrono::system_clock::now() );\n\n// or in millisecond\nauto timeSpan = chrono::high_resolution_clock::now() - chrono::time_point<chrono::high_resolution_clock>();\nstd::chrono::duration_cast<std::chrono::milliseconds>(timeSpan).count();\n\n// or\nchar buf[30] = {};\ntime_t now = time(nullptr);\nstrftime(buf, sizeof(buf), \"%F %T%Z\", gmtime(&now));\n\n// or\nstring timet2Str(time_t time, const string &format = \"%F %R\") {\n    std::stringstream ss;\n    ss << std::put_time(std::localtime(&time), format.c_str());\n    return ss.str();\n}",
         "tagList": [
             "C++"
         ]
@@ -155,7 +155,7 @@
     {
         "title": "Java获取当前毫秒时间戳",
         "description": "",
-        "content": "System.currentTimeMillis();  // or\\n(new Date()).getTime();",
+        "content": "System.currentTimeMillis();  // or\n(new Date()).getTime();",
         "tagList": [
             "Java"
         ]
@@ -179,7 +179,7 @@
     {
         "title": "ssh远程免密码访问",
         "description": "使用ssh-keygen本地生成id_rsa与id_rsa.pub，将pub发给服务端并写入到authorized_keys文件中，还要修改文件 .ssh 文件夹的权限为 700，authorized_keys 为644",
-        "content": "ssh-keygen\\nscp id_rsa.pub username@ip:~/\\nssh username@ip\\ncat id_rsa.pub >> .ssh/authorized_keys\\nchmod 700 .ssh/\\nchmod 644 .ssh/authorized_keys",
+        "content": "ssh-keygen\nscp id_rsa.pub username@ip:~/\nssh username@ip\ncat id_rsa.pub >> .ssh/authorized_keys\nchmod 700 .ssh/\nchmod 644 .ssh/authorized_keys",
         "tagList": [
             "Linux"
         ]
@@ -203,7 +203,7 @@
     {
         "title": "C/C++清除屏幕clear screen",
         "description": "使用C代码清屏方式 --> \\033[2J\\033[1;1H",
-        "content": "cout << \"\\033[2J\\033[1;1H\";\\n// or\\nprintf(\"\\033[2J\\033[1;1H\");",
+        "content": "cout << \"\\033[2J\\033[1;1H\";\n// or\nprintf(\"\\033[2J\\033[1;1H\");",
         "tagList": [
             "C++"
         ]
@@ -219,7 +219,7 @@
     {
         "title": "awk打印某一行/列",
         "description": "使用awk打印文件的某一行和某一列，可以配合管道 | 使用",
-        "content": "awk 'NR==2{print}' # 第2行\\nawk '{print $1}' # 第1列\\n# 列出docker镜像中id或name为none的\\ndocker images |awk '{print $1\" \"$3}' | grep none",
+        "content": "awk 'NR==2{print}' # 第2行\nawk '{print $1}' # 第1列\n# 列出docker镜像中id或name为none的\ndocker images |awk '{print $1\" \"$3}' | grep none",
         "tagList": [
             "Linux"
         ]
@@ -234,16 +234,16 @@
     },
     {
         "title": "bash脚本常用设置",
-        "description": "bash控制执行过程的一些设置，包括\\n1. 将未知变量认定为/视为错误\\n2. 命令出错立即退出\\n3. 显示执行的命令",
-        "content": "set -u # treat unknown var as error\\nset -e # exit on any error\\nset -x # show command",
+        "description": "bash控制执行过程的一些设置，包括\n1. 将未知变量认定为/视为错误\n2. 命令出错立即退出\n3. 显示执行的命令",
+        "content": "set -u # treat unknown var as error\nset -e # exit on any error\nset -x # show command",
         "tagList": [
             "Bash"
         ]
     },
     {
         "title": "ps命令使用",
-        "description": "按照指定格式输出系统进程，可以用来查看内存使用(rsz字段)，内存也可以通过 /proc/meminfo 文件查看\\nhtop、top效果更好",
-        "content": "ps -e -o 'pid,comm,args,pcpu,rsz,vsz,stime,user,uid'  # 格式化\\nps -fp pid # 查看某个进程详细信息",
+        "description": "按照指定格式输出系统进程，可以用来查看内存使用(rsz字段)，内存也可以通过 /proc/meminfo 文件查看\nhtop、top效果更好",
+        "content": "ps -e -o 'pid,comm,args,pcpu,rsz,vsz,stime,user,uid'  # 格式化\nps -fp pid # 查看某个进程详细信息",
         "tagList": [
             "Linux"
         ]
@@ -259,7 +259,7 @@
     {
         "title": "ssh允许root使用ssh远程登录",
         "description": "如下，修改文件中的 PermitRootLogin yes 然后重启ssh服务",
-        "content": "/etc/ssh/sshd_config - PermitRootLogin yes\\nsudo systemctl restart sshd.service",
+        "content": "/etc/ssh/sshd_config - PermitRootLogin yes\nsudo systemctl restart sshd.service",
         "tagList": [
             "Linux"
         ]
@@ -267,7 +267,7 @@
     {
         "title": "HTML更改滚动条样式",
         "description": "使用CSS修改网页中滚动条的样式",
-        "content": "::-webkit-scrollbar {\\n  max-width: 10px !important;\\n  max-height: 10px !important;\\n  background: #1d1d1d !important; }\\n\\n::-webkit-scrollbar-track,\\n::-webkit-scrollbar-corner {\\n  background: #1d1d1d !important; }\\n\\n::-webkit-scrollbar-thumb {\\n  background: rgba(175, 175, 175, 0.5) !important; }\\n\\n::-webkit-scrollbar-thumb:hover {\\n  background: rgba(65, 131, 196, 0.8) !important; }",
+        "content": "::-webkit-scrollbar {\n  max-width: 10px !important;\n  max-height: 10px !important;\n  background: #1d1d1d !important; }\n\n::-webkit-scrollbar-track,\n::-webkit-scrollbar-corner {\n  background: #1d1d1d !important; }\n\n::-webkit-scrollbar-thumb {\n  background: rgba(175, 175, 175, 0.5) !important; }\n\n::-webkit-scrollbar-thumb:hover {\n  background: rgba(65, 131, 196, 0.8) !important; }",
         "tagList": [
             "HTML"
         ]
@@ -283,7 +283,7 @@
     {
         "title": "Windows命令行启动控制面板的各个程序",
         "description": "",
-        "content": "Accessibility Options access.cpl\\nAdd/Remove Programs  appwiz.cpl\\nAdd Hardware Wizard  hdwwiz.cpl\\nAutomatic Updates  wuaucpl.cpl\\nBluetooth Properties  bthprops.cpl\\nDisplay Properties  desk.cpl\\nFirewall Properties  firewall.cpl\\nGame Controllers  joy.cpl\\nInternet Options  inetcpl.cpl\\niSCSI Initiator  iscsicpl.cpl\\nJava Control Panel  jpicpl32.cpl\\nLicensing Mode  liccpa.cpl\\nMouse Properties  main.cpl\\nNetwork Connections  ncpa.cpl\\nNetwork Setup Wizard  netsetup.cpl\\nODBC Properties  odbccp32.cpl\\nPower Options  powercfg.cpl\\nRegional and Language Options  intl.cpl\\nSound and Audio Devices  mmsys.cpl\\nStored Passwords  keymgr.cpl\\nSystem Properties  sysdm.cpl\\nTelephone and Modem Properties  telephon.cpl\\nTime and Date Settings  timedate.cpl\\nUser Accounts  nusrmgr.cpl\\nWindows Security Center  wscui.cpl\\nWireless Link  irprops.cpl",
+        "content": "Accessibility Options access.cpl\nAdd/Remove Programs  appwiz.cpl\nAdd Hardware Wizard  hdwwiz.cpl\nAutomatic Updates  wuaucpl.cpl\nBluetooth Properties  bthprops.cpl\nDisplay Properties  desk.cpl\nFirewall Properties  firewall.cpl\nGame Controllers  joy.cpl\nInternet Options  inetcpl.cpl\niSCSI Initiator  iscsicpl.cpl\nJava Control Panel  jpicpl32.cpl\nLicensing Mode  liccpa.cpl\nMouse Properties  main.cpl\nNetwork Connections  ncpa.cpl\nNetwork Setup Wizard  netsetup.cpl\nODBC Properties  odbccp32.cpl\nPower Options  powercfg.cpl\nRegional and Language Options  intl.cpl\nSound and Audio Devices  mmsys.cpl\nStored Passwords  keymgr.cpl\nSystem Properties  sysdm.cpl\nTelephone and Modem Properties  telephon.cpl\nTime and Date Settings  timedate.cpl\nUser Accounts  nusrmgr.cpl\nWindows Security Center  wscui.cpl\nWireless Link  irprops.cpl",
         "tagList": [
             "Cmd"
         ]
@@ -291,7 +291,7 @@
     {
         "title": "查看可执行文件的共享对象依赖信息（链接库）",
         "description": "",
-        "content": "ldd /usr/bin/python # 输出:\\n#        linux-vdso.so.1 (0x00007ffc2c25e000)\\n#        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb05d8f5000)\\n#        libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fb05d8d2000)\\n#        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fb05d8cc000)\\n#        libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007fb05d8c7000)\\n#        libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fb05d8ab000)\\n#        libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fb05d75c000)\\n#        /lib64/ld-linux-x86-64.so.2 (0x00007fb05deaa000)",
+        "content": "ldd /usr/bin/python # 输出:\n#        linux-vdso.so.1 (0x00007ffc2c25e000)\n#        libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007fb05d8f5000)\n#        libpthread.so.0 => /lib/x86_64-linux-gnu/libpthread.so.0 (0x00007fb05d8d2000)\n#        libdl.so.2 => /lib/x86_64-linux-gnu/libdl.so.2 (0x00007fb05d8cc000)\n#        libutil.so.1 => /lib/x86_64-linux-gnu/libutil.so.1 (0x00007fb05d8c7000)\n#        libz.so.1 => /lib/x86_64-linux-gnu/libz.so.1 (0x00007fb05d8ab000)\n#        libm.so.6 => /lib/x86_64-linux-gnu/libm.so.6 (0x00007fb05d75c000)\n#        /lib64/ld-linux-x86-64.so.2 (0x00007fb05deaa000)",
         "tagList": [
             "Bash"
         ]
@@ -299,7 +299,7 @@
     {
         "title": "git拉取远程pr到本地",
         "description": "将远程仓库的Pull Request拉取到本地新分支，参考https://stackoverflow.com/questions/27567846/how-can-i-check-out-a-github-pull-request-with-git",
-        "content": "\\n# where ID is the pull request id and BRANCHNAME is the name of the new branch that you want to create\\ngit fetch origin pull/ID/head:BRANCHNAME ",
+        "content": "\n# where ID is the pull request id and BRANCHNAME is the name of the new branch that you want to create\ngit fetch origin pull/ID/head:BRANCHNAME ",
         "tagList": [
             "Text"
         ]
@@ -307,7 +307,7 @@
     {
         "title": "设置bash自动补全忽略大小写",
         "description": "在 /etc/inputrc 文件中添加如下代码然后重新登录",
-        "content": "# /etc/inputrc\\nset completion-ignore-case on",
+        "content": "# /etc/inputrc\nset completion-ignore-case on",
         "tagList": [
             "Linux"
         ]
@@ -315,7 +315,7 @@
     {
         "title": "Docker部署本地registry",
         "description": "",
-        "content": "sudo mkdir -p /data/docker_reigstry # 创建本地文件夹\\n# 挂载，否则容器删除就没有了\\ndocker run -d -p 5000:5000 --name=xxx_registry --privileged=true  -v /data/docker_reigstry:/var/lib/registry  registry",
+        "content": "sudo mkdir -p /data/docker_reigstry # 创建本地文件夹\n# 挂载，否则容器删除就没有了\ndocker run -d -p 5000:5000 --name=xxx_registry --privileged=true  -v /data/docker_reigstry:/var/lib/registry  registry",
         "tagList": [
             "Linux"
         ]

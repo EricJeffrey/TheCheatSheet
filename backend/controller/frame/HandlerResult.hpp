@@ -16,6 +16,7 @@ struct HandlerResult {
     static const int32_t CODE_NEED_LOGIN = 201;
     static const int32_t CODE_MONGODB_CONFLICT = 302;
     static const int32_t CODE_UNKNOWN_FAILED = 400;
+    static const int32_t CODE_EXCEPTION = 0;
 
     static constexpr char MSG_SUCCESS[] = "operation success";
     static constexpr char MSG_WRONG_PASSWORD[] = "wrong password";

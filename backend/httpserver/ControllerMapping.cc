@@ -212,7 +212,10 @@ handlerWrapper(size_t index, int32_t parseMask) {
         // handy way for setting error code
         auto setError = [&response](int32_t status, const char *msg) {
             response.status = status;
-            response.set_content(msg, CONTENT_TYPE_PLAIN().c_str());
+            response.set_content(nlohmann::json{{controller::HandlerResult::KEY_CODE, -1},
+                                                {controller::HandlerResult::KEY_ERROR_MSG, msg}}
+                                     .dump(),
+                                 CONTENT_TYPE_JSON().c_str());
         };
 
         try {

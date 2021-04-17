@@ -34,6 +34,11 @@ void startServer() {
             break;
         }
     }
+    // todo return Set-Cookie header
+    // static file
+    if (!server.set_mount_point("/public", "./")) {
+        throw std::runtime_error("set static file mount point failed");
+    }
 
     Logger()->info("TheCheatsheet Server started, listening on {}:{}", Config::host, Config::port);
     server.listen(Config::host.c_str(), Config::port);
