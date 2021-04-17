@@ -2,7 +2,7 @@
 
 #include "../mongohelper/MongoHelper.hpp"
 #include <bsoncxx/exception/exception.hpp>
-#include <mongocxx/exception/exception.hpp>
+#include <bsoncxx/json.hpp>
 
 TEST(MongoTest, CRUDTest) {
     /*
@@ -10,6 +10,7 @@ TEST(MongoTest, CRUDTest) {
         docker stop sjf_mongo_test && docker rm sjf_mongo_test
         docker run -d --name sjf_mongo_test mongo:4.0 &&  docker inspect sjf_mongo_test |grep Addr
     */
+    using namespace mongohelper;
     fprintf(stderr, "testing--mongoIndexInit\n");
     EXPECT_TRUE(mongoIndexInit());
     /* addUser */
@@ -25,7 +26,7 @@ TEST(MongoTest, CRUDTest) {
             EXPECT_TRUE(addRes.has_value());
             testUserIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addUser(testUsers[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addUser(testUsers[0]).has_value());
     }
 
     /* addTag */
@@ -36,64 +37,58 @@ TEST(MongoTest, CRUDTest) {
     vector<string> testTagIds;
     {
         for (auto &&v : testTags) {
-            auto addRes = addTag(v);
+            auto addRes = addTag(v.mValue);
             EXPECT_TRUE(addRes.has_value());
             testTagIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addTag(testTags[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addTag(testTags[0].mValue).has_value());
     }
 
     /* addCodeSegment */
     fprintf(stderr, "testing--addCodeSegment\n");
     vector<CodeSegment> testCodeSegments = {
-        CodeSegment{"",
-                    "te3stTi抬头tle",
+        CodeSegment{"te3stTi抬头tle",
                     "测试de5sc",
                     "内容测试2",
                     1617372607,
                     1617372607,
                     1,
-                    {testTagIds[5], testTagIds[2], testTagIds[0]}},
-        CodeSegment{"",
-                    "tes1tTi抬头tle",
+                    {testTags[5].mValue, testTags[2].mValue, testTags[0].mValue}},
+        CodeSegment{"tes1tTi抬头tle",
                     "测试de4sc",
                     "内容测1试",
                     1617372607,
                     1617375233,
                     21,
-                    {testTagIds[1], testTagIds[2], testTagIds[3]}},
-        CodeSegment{"",
-                    "test2Ti抬头tle",
+                    {testTags[1].mValue, testTags[2].mValue, testTags[3].mValue}},
+        CodeSegment{"test2Ti抬头tle",
                     "测试de3sc",
                     "3内容测试",
                     1617372607,
                     1617378255,
                     23,
-                    {testTagIds[8], testTagIds[4], testTagIds[5]}},
-        CodeSegment{"",
-                    "testT4i抬头tle",
+                    {testTags[8].mValue, testTags[4].mValue, testTags[5].mValue}},
+        CodeSegment{"testT4i抬头tle",
                     "测试de2sc",
                     "内44容测试",
                     1617372607,
                     1617372320,
                     40,
-                    {testTagIds[9], testTagIds[6], testTagIds[8]}},
-        CodeSegment{"",
-                    "testTi5抬头tle",
+                    {testTags[9].mValue, testTags[6].mValue, testTags[8].mValue}},
+        CodeSegment{"testTi5抬头tle",
                     "测试desc1",
                     "内容5测试",
                     1617372607,
                     1617383550,
                     5,
-                    {testTagIds[3], testTagIds[9], testTagIds[7]}},
-        CodeSegment{"",
-                    "test中文title",
+                    {testTags[3].mValue, testTags[9].mValue, testTags[7].mValue}},
+        CodeSegment{"test中文title",
                     "test是描述",
                     "test好的content",
                     1617350753,
                     1617350753,
                     4,
-                    {testTagIds[3], testTagIds[8], testTagIds[9]}},
+                    {testTags[3].mValue, testTags[8].mValue, testTags[9].mValue}},
     };
     vector<string> testCodeSegmentIds;
     {
@@ -102,7 +97,7 @@ TEST(MongoTest, CRUDTest) {
             EXPECT_TRUE(addRes.has_value());
             testCodeSegmentIds.emplace_back(addRes.value());
         }
-        EXPECT_THROW(addCodeSegment(testCodeSegments[0]).has_value(), mongocxx::exception);
+        EXPECT_FALSE(addCodeSegment(testCodeSegments[0]).has_value());
     }
 
     /* getTags */
@@ -124,29 +119,42 @@ TEST(MongoTest, CRUDTest) {
         /* getCodeSegments-by favor number */
         fprintf(stderr, "testing--getCodeSegments\n");
         auto segmentsByFavorNumber = getCodeSegments(page, pageSize, SortOrder::favorNumber);
-        EXPECT_EQ(segmentsByFavorNumber.size(), 3ul);
+        EXPECT_EQ(segmentsByFavorNumber.mData.size(), 3ul);
         vector<int> expectIndexList = {3, 2, 1};
-        for (size_t i = 0; i < segmentsByFavorNumber.size(); i++) {
-            EXPECT_EQ(segmentsByFavorNumber[i], testCodeSegments[expectIndexList[i]]);
+        for (size_t i = 0; i < segmentsByFavorNumber.mData.size(); i++) {
+            EXPECT_EQ(segmentsByFavorNumber.mData[i], testCodeSegments[expectIndexList[i]]);
         }
 
         /* getCodeSegments-by lastModified and tag*/
         fprintf(stderr, "testing--getCodeSegments\n");
         auto segmentsByTagJava =
-            getCodeSegments(page, pageSize, SortOrder::lastModified, testTagIds[3]);
-        EXPECT_EQ(segmentsByTagJava.size(), 3ul);
+            getCodeSegments(page, pageSize, SortOrder::lastModified, testTags[3].mValue);
+        EXPECT_EQ(segmentsByTagJava.mData.size(), 3ul);
         expectIndexList = {4, 1, 5};
-        for (size_t i = 0; i < segmentsByTagJava.size(); i++) {
-            EXPECT_EQ(segmentsByTagJava[i], testCodeSegments[expectIndexList[i]]);
+        for (size_t i = 0; i < segmentsByTagJava.mData.size(); i++) {
+            EXPECT_EQ(segmentsByTagJava.mData[i], testCodeSegments[expectIndexList[i]]);
         }
 
         /* getCodeSegments-by lastModified and wrong tag */
         fprintf(stderr, "testing--getCodeSegments\n");
 
-        auto segmentsByTagJAVA =
-            getCodeSegments(page, pageSize, SortOrder::lastModified, "ThisWillNotBeAnID");
-        EXPECT_EQ(segmentsByTagJAVA.size(), 0ul);
+        vector<CodeSegment> segmentsByTagJAVA;
+        EXPECT_THROW(
+            segmentsByTagJAVA =
+                getCodeSegments(page, pageSize, SortOrder::lastModified, "ThisWillNotBeAnID").mData,
+            bsoncxx::exception);
     }
+
+    /* removeTagOfCodeSegment */
+    // {
+    //     fprintf(stderr, "removeTagOfCodeSegment\n");
+    //     EXPECT_THROW(removeTagOfCodeSegment(testCodeSegmentIds[0], "ThisWillNotBeAnID"),
+    //                  bsoncxx::exception);
+    //     EXPECT_TRUE(removeTagOfCodeSegment(testCodeSegmentIds[1], testTags[2].mValue));
+    //     EXPECT_FALSE(removeTagOfCodeSegment(testCodeSegmentIds[2], testTags[0].mValue));
+    //     EXPECT_EQ(findCodeSegmentByTitle(testCodeSegments[1].mTitle).value().mTagList.size(),
+    //     2u);
+    // }
 
     /* findCodeSegmentByTitle */
     fprintf(stderr, "testing--findCodeSegmentByTitle\n");
@@ -160,13 +168,13 @@ TEST(MongoTest, CRUDTest) {
     }
 
     /* countCodeSegment */
-    fprintf(stderr, "testing--countCodeSegment\n");
-    {
-        EXPECT_EQ(countCodeSegment(), 6);
-        EXPECT_EQ(countCodeSegment(testTagIds[3]), 3);
-        EXPECT_EQ(countCodeSegment(testTagIds[2]), 2);
-        EXPECT_NE(countCodeSegment(testTagIds[4]), -222);
-    }
+    // fprintf(stderr, "testing--countCodeSegment\n");
+    // {
+    //     EXPECT_EQ(countCodeSegment(), 6);
+    //     EXPECT_EQ(countCodeSegment(testTags[3].mValue), 3);
+    //     EXPECT_EQ(countCodeSegment(testTags[2].mValue), 2);
+    //     EXPECT_NE(countCodeSegment(testTags[4].mValue), -222);
+    // }
 
     /* updateCodeSegment */
     fprintf(stderr, "testing--updateCodeSegment\n");
@@ -194,11 +202,11 @@ TEST(MongoTest, CRUDTest) {
 
         /* getUserFavors */
         fprintf(stderr, "testing--getUserFavors\n");
-        auto userFavors = getUserFavors(testUserIds[0], 1, 3);
+        auto userFavors = getUserFavors(testUserIds[0], 1, 3).mData;
         EXPECT_EQ(userFavors.size(), 1u);
         EXPECT_EQ(userFavors[0], testCodeSegments[1]);
-        EXPECT_EQ(getUserFavors(testUserIds[3], 2, 3).size(), 0u);
-        EXPECT_THROW(getUserFavors("ThisWillNotBeAnIDToo", 1, 3).size(), bsoncxx::exception);
+        EXPECT_EQ(getUserFavors(testUserIds[3], 2, 3).mData.size(), 0u);
+        EXPECT_THROW(getUserFavors("ThisWillNotBeAnIDToo", 1, 3).mData.size(), bsoncxx::exception);
 
         /* getUserFavorsIds */
         fprintf(stderr, "testing--getUserFavorsIds\n");
@@ -209,11 +217,11 @@ TEST(MongoTest, CRUDTest) {
         EXPECT_THROW(getUserFavorsIds("ThisWillNotBeAnIDToo").size(), bsoncxx::exception);
 
         /* countUserFavors */
-        fprintf(stderr, "testing--countUserFavors\n");
-        EXPECT_EQ(countUserFavors(testUserIds[0]), 2);
-        for (size_t i = 1; i < testUserIds.size(); i++) {
-            EXPECT_EQ(countUserFavors(testUserIds[i]), 0);
-        }
+        // fprintf(stderr, "testing--countUserFavors\n");
+        // EXPECT_EQ(countUserFavors(testUserIds[0]), 2);
+        // for (size_t i = 1; i < testUserIds.size(); i++) {
+        //     EXPECT_EQ(countUserFavors(testUserIds[i]), 0);
+        // }
     }
     fprintf(stderr, "testing--done\n");
 }

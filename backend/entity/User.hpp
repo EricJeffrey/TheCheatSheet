@@ -4,6 +4,8 @@
 #include <string>
 #include <vector>
 
+#include "nlohmann/json.hpp"
+
 using std::string;
 using std::vector;
 
@@ -20,7 +22,7 @@ public:
     string mName;
     string mEmail;
     string mPassword;
-    vector<string> mFavors;
+    vector<string> mFavorIds;
 
     User() = default;
     ~User() = default;
@@ -28,14 +30,22 @@ public:
         : mName(name), mEmail(email), mPassword(password) {}
     bool operator==(const User &t) const {
         return mName == t.mName && mEmail == t.mEmail && mPassword == t.mPassword &&
-               mFavors == t.mFavors;
+               mFavorIds == t.mFavorIds;
+    }
+
+    nlohmann::json toJson() {
+        return nlohmann::json{
+            {KEY_ID, mId},           {KEY_NAME, mName},
+            {KEY_EMAIL, mEmail},     {KEY_PASSWORD, mPassword},
+            {KEY_FAVORS, mFavorIds},
+        };
     }
 
     void setId(const string &id) { mId = id; }
     void setName(const string &name) { mName = name; }
     void setEmail(const string &email) { mEmail = email; }
     void setPassword(const string &password) { mPassword = password; }
-    void setFavors(const vector<string> &favors) { mFavors = favors; }
+    void setFavors(const vector<string> &favors) { mFavorIds = favors; }
 };
 
 #endif // USER_HPP

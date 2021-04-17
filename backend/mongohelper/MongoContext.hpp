@@ -8,6 +8,8 @@
 
 using std::string;
 
+// helpers for mongodb
+namespace mongohelper {
 // MongoDB related stuff
 struct MongoContext {
     // This should be done only once
@@ -17,12 +19,13 @@ struct MongoContext {
     static string COLLECTION_CODE_SEGMENT;
     static string COLLECTION_USER;
     static string COLLECTION_TAG;
+    static void config(const string &host, const int32_t port);
 };
 
-mongocxx::pool::entry mongoClient();
+mongocxx::pool::entry mongoClientEntry();
 
 // Get collection, the lifetime of collection should be within the lifetime of client.
 mongocxx::collection mongoCollection(const mongocxx::pool::entry &clientEntry,
                                      const string &collectionName);
-
+} // namespace mongohelper
 #endif // CONTEXT_HPP
