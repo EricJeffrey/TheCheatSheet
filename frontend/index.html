@@ -5,22 +5,23 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>TheCheatsheet-速查表📝</title>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     <!-- 生产环境版本 -->
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12"></script>
     <style>
         body,
         html {
             margin: 0px;
             height: 100%;
             background-color: whitesmoke;
+            overflow-y: hidden;
         }
 
         input,
         textarea {
-            padding: 5px;
+            padding: 10px;
             margin-bottom: 5px;
             font-size: medium;
             font-family: Consolas, "等线", '微软雅黑';
@@ -81,6 +82,7 @@
             width: 80%;
             margin: auto;
             display: flex;
+            height: 100%;
         }
 
         #header {
@@ -91,9 +93,13 @@
             font-size: xx-large;
             font-family: 'Lucida Calligraphy', Consolas, '等线';
             font-weight: bold;
-            color: rgb(29, 124, 108);
-            text-shadow: rgb(55, 189, 93) 1px 1px 1px;
+            color: rgb(39, 63, 108);
             cursor: pointer;
+        }
+
+        #main {
+            flex-grow: 0;
+            overflow-y: hidden;
         }
 
 
@@ -110,9 +116,19 @@
             max-width: 50%;
         }
 
-        .searchResultDiv {
+        #searchInput{
+            border: None;
+            box-shadow: darkgrey 1px 1px 10px;
+            outline: None;
+            margin-left: 5px;
+        }
+
+        #searchResultDiv {
             overflow-y: auto;
             overflow-x: hidden;
+            padding-left: 5px;
+            padding-right: 10px;
+            padding-bottom: 10px;
         }
 
         .searchResultNoDataDiv {
@@ -247,7 +263,7 @@
         </div>
         <div id="main" class="flexRow">
             <div id="searchHolderDiv" class="flexCol">
-                <div class="labelDiv">搜索代码段</div>
+                <div class="labelDiv" style="margin-left: 5px">搜索代码段</div>
                 <input type="text" name="search" id="searchInput" placeholder="(•_•)" v-on:keyup.enter="doSearch">
                 <div class="flexCol" id="searchResultDiv">
                     <div class="searchResultNoDataDiv" v-if="searchResult.segments.length == 0"> 没有数据 ⊙﹏⊙ </div>
@@ -366,7 +382,7 @@
                 }
             },
             created: function () {
-                fetch("/getCodeSegments?pageSize=20")
+                fetch("/getCodeSegments?pageSize=100")
                     .then(v => {
                         if (v.ok) {
                             v.json().then(vv => {
