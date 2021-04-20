@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TheCheatsheet-速查表📝</title>
+    <title>📝TheCheatsheet-速查表</title>
     <!-- 开发环境版本，包含了有帮助的命令行警告 -->
     <!-- <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script> -->
     <!-- 生产环境版本 -->
@@ -15,16 +15,24 @@
         html {
             margin: 0px;
             height: 100%;
-            background-color: whitesmoke;
+            background-color: white;
             overflow-y: hidden;
         }
 
         input,
         textarea {
             padding: 10px;
-            margin-bottom: 5px;
+            margin-bottom: 10px;
             font-size: medium;
             font-family: Consolas, "等线", '微软雅黑';
+            resize: vertical;
+            outline: none;
+            border-radius: 5px;
+            border: lightskyblue 1px solid;
+            transition: all 300ms ease;
+        }
+        input:hover, textarea:hover {
+            box-shadow: skyblue 1px 1px 16px;
         }
 
         input:last-child,
@@ -42,7 +50,39 @@
 
         }
 
+        button {
+            background-color: lightskyblue;
+            border: none;
+            padding: 10px 0px;
+            transition: 300ms ease all;
+            font-size: medium;
+            font-weight: bold;
+        }
 
+        button:hover {
+            background-color: #5da6c4;
+            color: white;
+        }
+
+        ::-webkit-scrollbar {
+            max-width: 6px !important;
+            max-height: 6px !important;
+            background: white !important;
+        }
+
+        ::-webkit-scrollbar-track,
+        ::-webkit-scrollbar-corner {
+            background: white !important;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: lightskyblue !important;
+            transition: 300ms ease all;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgb(114, 173, 197) !important;
+        }
 
         .flexRow {
             display: flex;
@@ -93,7 +133,7 @@
             font-size: xx-large;
             font-family: 'Lucida Calligraphy', Consolas, '等线';
             font-weight: bold;
-            color: rgb(39, 63, 108);
+            color: #3490dc;
             cursor: pointer;
         }
 
@@ -107,6 +147,7 @@
             font-size: x-large;
             font-weight: bold;
             margin-bottom: 10px;
+            color: #3490dc;
         }
 
         #searchHolderDiv,
@@ -117,9 +158,9 @@
         }
 
         #searchInput{
-            border: None;
-            box-shadow: darkgrey 1px 1px 10px;
-            outline: None;
+            /* border: None; */
+            /* box-shadow: darkgrey 1px 1px 10px; */
+            /* outline: None; */
             margin-left: 5px;
         }
 
@@ -140,14 +181,15 @@
             transition: all ease 300ms;
             margin-bottom: 10px;
             padding: 15px;
-            box-shadow: darkgray 1px 1px 6px;
+            /* box-shadow: darkgray 1px 1px 6px; */
             border-radius: 5px;
-            margin-top: 10px;
+            margin-top: 15px;
             background-color: white;
+            border: lightskyblue 1px solid;
         }
 
         .segmentCardDiv:hover {
-            box-shadow: darkgray 1px 1px 16px;
+            box-shadow: skyblue 1px 1px 16px;
 
         }
 
@@ -165,7 +207,7 @@
 
         .segmentContentDiv {
             overflow-x: auto;
-            padding: 3px;
+            padding: 10px 5px;
             border: solid rgba(65, 96, 105, 0.425) 1px;
             border-radius: 5px;
         }
@@ -185,7 +227,13 @@
             border: lightgray 1px solid;
             margin-right: 10px;
             cursor: pointer;
+            transition: 300ms ease all;
         }
+
+        .segmentTagDiv:hover {
+            background: lightskyblue;
+            border-color: skyblue;
+	}
 
         .segmentTagDiv:last-child {
             margin-right: 0px;
@@ -255,16 +303,16 @@
 </head>
 
 <body>
-    <input id="copyHelperInput"></input>
+    <textarea id="copyHelperInput"></textarea>
     <div id="notifyHelperDiv"></div>
     <div id="app" class="flexCol">
         <div id="header" class="flexRow">
-            <div id="logo">TheCheatsheet - 搜索 复制 粘贴！</div>
+            <div id="logo">TheCheatsheet</div>
         </div>
         <div id="main" class="flexRow">
             <div id="searchHolderDiv" class="flexCol">
                 <div class="labelDiv" style="margin-left: 5px">搜索代码段</div>
-                <input type="text" name="search" id="searchInput" placeholder="(•_•)" v-on:keyup.enter="doSearch">
+                <input type="text" name="search" id="searchInput" autofocus="autofocus" placeholder="(•_•)" v-on:keyup.enter="doSearch">
                 <div class="flexCol" id="searchResultDiv">
                     <div class="searchResultNoDataDiv" v-if="searchResult.segments.length == 0"> 没有数据 ⊙﹏⊙ </div>
                     <div class="segmentCardDiv flexCol" v-for="item in searchResult.segments">
@@ -272,7 +320,8 @@
                             <div class="segmentTitleDiv"> {{item.title}} </div>
                             <span class="doCopySpan" v-on:click="doCopy(item.content)">复制</span>
                         </div>
-                        <div class="segmentDescDiv"> {{searchResult.lfConvertedData(item.description)}} </div>
+                        <!-- <div class="segmentDescDiv"> {{searchResult.lfConvertedData(item.description)}} </div> !-->
+                        <div class="segmentDescDiv"> {{ item.description }} </div>
                         <div class="segmentContentDiv">
                             <code><pre class="segmentContentCode">{{item.content}}</pre></code>
                         </div>
@@ -395,6 +444,9 @@
                     }).catch(v => {
                         showNotify("获取数据失败，网络错误");
                     });
+            },
+            mounted: function () {
+                document.getElementById("searchInput").focus();
             }
         });
 
